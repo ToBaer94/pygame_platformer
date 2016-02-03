@@ -31,9 +31,16 @@ def main():
 
     clock = pygame.time.Clock()
 
-    while not done:
+    target_fps = 60.0 # Intended FPS maximum
+    ms_per_sec = 1000.0 # Ms in one second
+    desired_frame_time = float(ms_per_sec) / float(target_fps) # Amount of ms per frame at target_fps
+    max_delta_time = 1.0 # Max step the game physics get moved by
 
-        dt = clock.tick(60)
+    current_time = pygame.time.get_ticks() # time since pygame.init()
+
+    while not done:
+        frame_time = clock.tick(60)
+        total_delta_time = float(frame_time) / float(desired_frame_time) # Total amount of steps
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -41,11 +48,11 @@ def main():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    player.go_left(dt / 1000.0)
+                    player.go_left()
                 if event.key == pygame.K_RIGHT:
-                    player.go_right(dt / 1000.0)
+                    player.go_right()
                 if event.key == pygame.K_UP:
-                    player.jump(dt / 1000.0)
+                    player.jump()
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT and player.change_x < 0:
@@ -56,8 +63,13 @@ def main():
                 if event.key == pygame.K_SPACE:
                     player.fire()
 
-        active_sprite_list.update(dt / 1000.0)
-        current_level.update(dt / 1000.0)
+        while total_delta_time > 0.0: # While there still have to be made steps to keep physics constant
+            # Update physics by 1 step until enough steps have been made
+            delta_time = min(total_delta_time, max_delta_time)
+            active_sprite_list.update(delta_time)
+            current_level.update(delta_time)
+            total_delta_time -= delta_time
+
 
         # Camera / Viewport control
         if player.rect.right >= 500:
@@ -124,53 +136,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-        
-        
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
-        
-
-        
-        

@@ -132,9 +132,9 @@ class Player(pygame.sprite.Sprite):
         to make movement FPS independent.
         """
 
-        self.calc_grav(dt)
+        self.calc_grav()
 
-        self.x_pos += float(self.change_x)
+        self.x_pos += float(self.change_x) * dt
         self.rect.x = self.x_pos
 
         # If the player is moving, play the correct movement animation
@@ -173,7 +173,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.x = 0
             self.x_pos = 0
 
-        self.y_pos += float(self.change_y)
+        self.y_pos += float(self.change_y) * dt
         self.rect.y = self.y_pos
 
         # Handle platform collision after y-axis movement
@@ -202,17 +202,17 @@ class Player(pygame.sprite.Sprite):
 
             block.collide() # Call collide method for specific platforms (item block, moving platform)
 
-    def calc_grav(self, dt):
+    def calc_grav(self):
         """
         Handles gravity
         """
         if self.change_y == 0:
-            self.change_y = 60 * dt
+            self.change_y = 1
 
         else:
-            self.change_y += 21 * dt
+            self.change_y += 0.35
 
-    def jump(self, dt):
+    def jump(self):
         """
         Moves the player down 2 pixels to check if he is on the ground, then sets him back up 2 pixels.
         If on the ground, sets y-velocity.
@@ -222,15 +222,15 @@ class Player(pygame.sprite.Sprite):
         self.rect.y -= 2
 
         if len(platform_hit_list) > 0:
-            self.change_y = -600 * dt
+            self.change_y = -10
             self.jumping = True
 
-    def go_left(self, dt):
-        self.change_x = -240 * dt
+    def go_left(self):
+        self.change_x = -4
         self.direction = "Left"
 
-    def go_right(self, dt):
-        self.change_x = 240 * dt
+    def go_right(self):
+        self.change_x = 4
         self.direction = "Right"
 
     def stop(self):
