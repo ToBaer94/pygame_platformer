@@ -11,7 +11,7 @@ def main():
     size = [SCREEN_WIDTH, SCREEN_HEIGHT]
     screen = pygame.display.set_mode(size)
 
-    pygame.display.set_caption("Platform Jumper Mario")
+    pygame.display.set_caption("Platform Jumper")
 
     player = Player() # Create the player
 
