@@ -24,7 +24,7 @@ class Level(object):
 
         self.background = None
 
-    def update(self):
+    def update(self, dt):
         self.platform_list.update()
         self.enemy_list.update()
         self.item_list.update()

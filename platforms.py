@@ -16,13 +16,11 @@ POWER_DOWN            = (0  , 71 , 70, 70)
 img_dir = path.join(path.dirname(__file__), "world")
 
 
-
 class Platform(pygame.sprite.Sprite):
     """
     Class for basic platforms. Uses sprite_sheet.get
     to get the appropriate sprite according to defined values above
     """
-
     def __init__(self, sprite_sheet_data):
         super(Platform, self).__init__()
 
@@ -48,7 +46,7 @@ class Platform(pygame.sprite.Sprite):
 
 class MovingPlatform(Platform):
     """
-    Platform that moves on the x or why axis
+    Platform that moves on the x or y axis
     """
     def __init__(self, sprite_sheet_data):
         super(MovingPlatform, self).__init__(sprite_sheet_data)
@@ -74,8 +72,10 @@ class MovingPlatform(Platform):
         if hit:
             if self.change_x < 0:
                 self.player.rect.right = self.rect.left
+                self.player.x_pos = self.player.rect.x
             else:
                 self.player.rect.left = self.rect.right
+                self.player.x_pos = self.player.rect.x
 
         self.rect.y += self.change_y
 
@@ -83,8 +83,10 @@ class MovingPlatform(Platform):
         if hit:
             if self.change_y < 0:
                 self.player.rect.bottom = self.rect.top
+                self.player.y_pos = self.player.rect.y
             else:
                 self.player.rect.top = self.rect.bottom
+                self.player.y_pos = self.player.rect.y
 
         if self.rect.bottom > self.boundary_bottom or self.rect.top < self.boundary_top:
             self.change_y *= -1
@@ -94,7 +96,8 @@ class MovingPlatform(Platform):
             self.change_x *= -1
 
     def collide(self):
-        self.player.rect.x += self.change_x
+        self.player.x_pos += self.change_x
+        self.player.rect.x = self.player.x_pos
 
 
 class SpecialBlock(Platform):
@@ -135,7 +138,3 @@ class SpecialBlock(Platform):
         item.level_platform_list = self.level.platform_list
         item.player = self.player
         self.level.item_list.add(item)
-
-
-
-
