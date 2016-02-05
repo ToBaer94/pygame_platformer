@@ -132,7 +132,7 @@ class Player(pygame.sprite.Sprite):
         to make movement FPS independent.
         """
 
-        self.calc_grav()
+        self.calc_grav(dt)
 
         self.x_pos += float(self.change_x) * dt
         self.rect.x = self.x_pos
@@ -142,9 +142,11 @@ class Player(pygame.sprite.Sprite):
             pos = self.rect.x + self.level.world_shift
             if self.direction == "Right":
                 frame = (pos // 30) % len(self.walking_frames_r)
+                frame = int(frame)
                 self.image = self.walking_frames_r[frame]
             else:
                 frame = (pos // 30) % len(self.walking_frames_l)
+                frame = int(frame)
                 self.image = self.walking_frames_l[frame]
         # Else display the idle sprite
         else:
@@ -200,9 +202,9 @@ class Player(pygame.sprite.Sprite):
                 self.y_pos = self.rect.y
             self.change_y = 0
 
-            block.collide() # Call collide method for specific platforms (item block, moving platform)
+            block.collide(dt) # Call collide method for specific platforms (item block, moving platform)
 
-    def calc_grav(self):
+    def calc_grav(self, dt):
         """
         Handles gravity
         """
@@ -210,7 +212,7 @@ class Player(pygame.sprite.Sprite):
             self.change_y = 1
 
         else:
-            self.change_y += 0.35
+            self.change_y += 0.35 * dt
 
     def jump(self):
         """
@@ -278,8 +280,5 @@ class Player(pygame.sprite.Sprite):
 
         if self.status == "Fire":
             if len(self.level.effect_list) < 4:
-                fireball = powerup.Fireball()
-                fireball.player = self
-                fireball.direction = self.direction
-                fireball.spawn(self.level)
+                fireball = powerup.Fireball(self, self.level, self.direction)
                 self.level.effect_list.add(fireball)
