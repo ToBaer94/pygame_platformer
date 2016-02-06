@@ -87,10 +87,10 @@ class MovingPlatform(Platform):
         if hit:
             if self.change_x < 0:
                 self.player.rect.right = self.rect.left
-                self.player.x_pos = self.player.rect.x
+                self.player.pos.x = self.player.rect.x
             else:
                 self.player.rect.left = self.rect.right
-                self.player.x_pos = self.player.rect.x
+                self.player.pos.x = self.player.rect.x
 
         self.player_collide(dt)
 
@@ -101,10 +101,10 @@ class MovingPlatform(Platform):
         if hit:
             if self.change_y < 0:
                 self.player.rect.bottom = self.rect.top
-                self.player.y_pos = self.player.rect.y
+                self.player.pos.y = self.player.rect.y
             else:
                 self.player.rect.top = self.rect.bottom
-                self.player.y_pos = self.player.rect.y
+                self.player.pos.y = self.player.rect.y
         if self.change_y != 0:
             cur_y_pos = round(self.y_pos)
             if cur_y_pos > self.boundary_bottom or cur_y_pos < self.boundary_top:
@@ -128,15 +128,15 @@ class MovingPlatform(Platform):
     def player_collide(self, dt):
 
         if self.change_x != 0:
-            self.player.y_pos += 2
-            self.player.rect.y = self.player.y_pos
+            self.player.pos.y += 2
+            self.player.rect.y = self.player.pos.y
             hit = pygame.sprite.collide_rect(self, self.player)
-            self.player.y_pos -= 2
-            self.player.rect.y = self.player.y_pos
+            self.player.pos.y -= 2
+            self.player.rect.y = self.player.pos.y
             if hit:
                 print "yey"
-                self.player.x_pos += self.change_x * dt
-                self.player.rect.x = self.player.x_pos
+                self.player.pos.x += self.change_x * dt
+                self.player.rect.x = self.player.pos.x
 
 
 class SpecialBlock(Platform):

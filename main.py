@@ -50,7 +50,12 @@ class GameEngine(object):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.done = True
-
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.player.fire()
+                if event.key == pygame.K_UP:
+                    self.player.jump()
+            """
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     self.player.go_left()
@@ -64,13 +69,21 @@ class GameEngine(object):
                     self.FPS += 2
 
             if event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT and self.player.change_x < 0:
+                if event.key == pygame.K_LEFT and self.player.acc.x < 0:
                     self.player.stop()
-                if event.key == pygame.K_RIGHT and self.player.change_x > 0:
+                if event.key == pygame.K_RIGHT and self.player.acc.x > 0:
                     self.player.stop()
+            """
+        key_pressed = pygame.key.get_pressed()
+        if key_pressed[pygame.K_LEFT]:
+            self.player.go_left()
+        elif not key_pressed[pygame.K_LEFT] and self.player.acc.x < 0:
+            self.player.stop()
+        if key_pressed[pygame.K_RIGHT]:
+            self.player.go_right()
+        elif not key_pressed[pygame.K_RIGHT] and self.player.acc.x > 0:
+            self.player.stop()
 
-                if event.key == pygame.K_SPACE:
-                    self.player.fire()
 
     def update_everything(self, frame_time):
         total_delta_time = float(frame_time) / float(self.desired_frame_time) # Total amount of steps
@@ -84,7 +97,7 @@ class GameEngine(object):
 
         self.move_camera()
 
-        if self.current_level.world_shift < self.current_level.level_limit and self.player.x_pos >= 450:
+        if self.current_level.world_shift < self.current_level.level_limit and self.player.pos.x >= 450:
             self.switch_level()
 
         if self.player.rect.top > SCREEN_HEIGHT or self.player.dead:
@@ -92,36 +105,36 @@ class GameEngine(object):
             self.game_over = True
 
     def move_camera(self):
-        if self.player.x_pos >= 500:
-            diff = self.player.x_pos - 500.0
-            self.player.x_pos = 500
-            self.player.rect.x = self.player.x_pos
+        if self.player.pos.x >= 500:
+            diff = self.player.pos.x - 500.0
+            self.player.pos.x = 500
+            self.player.rect.x = self.player.pos.x
             self.current_level.shift_world(-diff)
 
-        if self.player.x_pos <= 120:
-            diff = 120 - self.player.x_pos
+        if self.player.pos.x <= 120:
+            diff = 120 - self.player.pos.x
             if self.player.level.world_shift >= -5:
                 pass
             else:
-                self.player.x_pos = 120
-                self.player.rect.x = self.player.x_pos
+                self.player.pos.x = 120
+                self.player.rect.x = self.player.pos.x
             self.current_level.shift_world(diff)
 
     def switch_level(self):
-        self.player.x_pos = 120
-        self.player.rect.x = self.player.x_pos
+        self.player.pos.x = 120
+        self.player.rect.x = self.player.pos.x
         if self.current_level_no < len(self.level_list)-1:
             self.current_level_no += 1
             self.current_level = self.level_list[self.current_level_no]
             self.player.level = self.current_level
-            self.player.y_pos = 560 - self.player.rect.height
-            self.player.rect.y = self.player.y_pos
+            self.player.pos.y = 560 - self.player.rect.height
+            self.player.rect.y = self.player.pos.y
         else:
             # If last level, rest viewport and player position to level start
             self.current_level.shift_world((-self.current_level.world_shift))
             self.current_level.world_shift = 0
-            self.player.y_pos = 560 - self.player.rect.height
-            self.player.rect.y = self.player.y_pos
+            self.player.pos.y = 560 - self.player.rect.height
+            self.player.rect.y = self.player.pos.y
             print "reached the end of the last level"
 
     def draw_everything(self):

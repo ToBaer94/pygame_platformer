@@ -5,6 +5,8 @@ from spritesheet_functions import SpriteSheet
 from os import path
 import powerup
 
+vector = pygame.math.Vector2
+
 img_dir = path.join(path.dirname(__file__), "player_character")
 
 
@@ -31,17 +33,15 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
         self.rect.x = 120
-        self.x_pos = 120 # Used for float point positioning
-
         self.rect.y = 580 - self.rect.height
-        self.y_pos = 580 - self.rect.height # Used for float point positioning
+
+        self.pos = vector(120, 580 - self.rect.height)
+        self.vel = vector(0, 0)
+        self.acc = vector(0, 0)
 
         self.status = "Small" # Power up status
 
         self.direction = "Right" # Sprite direction
-
-        self.change_x = 0
-        self.change_y = 0
 
         self.level = None
 
@@ -137,20 +137,23 @@ class Player(pygame.sprite.Sprite):
 
         self.calc_grav(dt)
 
-        self.x_pos += float(self.change_x) * dt
-        self.rect.x = self.x_pos
+        self.acc.x -= self.vel.x * 0.12 * dt
+        self.vel.x += float(self.acc.x) * dt
+        self.pos.x += self.vel.x * dt + 0.5 * self.acc.x * dt * dt
+        self.rect.x = self.pos.x
 
         # If the player is moving, play the correct movement animation
-        if self.change_x != 0:
+        if 0.2 < self.vel.x or self.vel.x < -0.2:
             pos = self.rect.x + self.level.world_shift
             if self.direction == "Right":
-                frame = (pos // 30) % len(self.walking_frames_r)
+                frame = (pos // 20) % len(self.walking_frames_r)
                 frame = int(frame)
                 self.image = self.walking_frames_r[frame]
             else:
-                frame = (pos // 30) % len(self.walking_frames_l)
+                frame = (pos // 20) % len(self.walking_frames_l)
                 frame = int(frame)
                 self.image = self.walking_frames_l[frame]
+
         # Else display the idle sprite
         else:
             if self.direction == "Right":
@@ -161,12 +164,15 @@ class Player(pygame.sprite.Sprite):
         # Handle platform collisions after x-axis movement
         block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
         for block in block_hit_list:
-            if self.change_x > 0:
+
+            if self.vel.x > 0:
                 self.rect.right = block.rect.left
-                self.x_pos = self.rect.x
-            elif self.change_x < 0:
+                self.pos.x = self.rect.x
+                self.vel.x = 0
+            elif self.vel.x < 0:
                 self.rect.left = block.rect.right
-                self.x_pos = self.rect.x
+                self.pos.x = self.rect.x
+                self.vel.x = 0
 
         # Handle item pick up collisions
         item_hit_list = pygame.sprite.spritecollide(self, self.level.item_list, True)
@@ -174,12 +180,14 @@ class Player(pygame.sprite.Sprite):
             item.collide()
 
         # Prevent the player from going off screen
-        if self.rect.x <= 0:
-            self.rect.x = 0
-            self.x_pos = 0
+        if self.pos.x <= 0:
+            self.rect.x = 1
+            self.pos.x = 1
+            self.vel.x = 0
 
-        self.y_pos += float(self.change_y) * dt
-        self.rect.y = self.y_pos
+        self.vel.y += float(self.acc.y) * dt
+        self.pos.y += self.vel.y * dt + 0.5 * self.acc.y * dt * dt
+        self.rect.y = self.pos.y
 
         self.enemy_collide()
 
@@ -199,13 +207,14 @@ class Player(pygame.sprite.Sprite):
                     self.image = self.jumping_sprite_l
 
         for block in block_hit_list:
-            if self.change_y > 0:
+            if self.vel.y > 0:
                 self.rect.bottom = block.rect.top
-                self.y_pos = self.rect.y
-            elif self.change_y < 0:
+                self.pos.y = self.rect.y
+
+            elif self.vel.y < 0:
                 self.rect.top = block.rect.bottom
-                self.y_pos = self.rect.y
-            self.change_y = 0
+                self.pos.y = self.rect.y
+            self.vel.y = 0
 
             block.collide(dt) # Call collide method for specific platforms (item block, moving platform)
 
@@ -231,11 +240,12 @@ class Player(pygame.sprite.Sprite):
         """
         Handles gravity
         """
-        if self.change_y == 0:
-            self.change_y = 1
+        if self.vel.y == 0:
+            self.vel.y = 1
 
         else:
-            self.change_y += 0.35 * dt
+            self.acc.y = 0.35 * dt
+
 
     def jump(self):
         """
@@ -247,19 +257,19 @@ class Player(pygame.sprite.Sprite):
         self.rect.y -= 2
 
         if len(platform_hit_list) > 0:
-            self.change_y = -10
+            self.vel.y = -10
             self.jumping = True
 
     def go_left(self):
-        self.change_x = -4
+        self.acc.x = -0.5
         self.direction = "Left"
 
     def go_right(self):
-        self.change_x = 4
+        self.acc.x = 0.5
         self.direction = "Right"
 
     def stop(self):
-        self.change_x = 0
+        self.acc.x = 0
 
     def powerup(self):
         """
