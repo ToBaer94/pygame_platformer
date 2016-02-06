@@ -30,6 +30,12 @@ class Player(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
 
+        self.rect.x = 120
+        self.x_pos = 120 # Used for float point positioning
+
+        self.rect.y = 580 - self.rect.height
+        self.y_pos = 580 - self.rect.height # Used for float point positioning
+
         self.status = "Small" # Power up status
 
         self.direction = "Right" # Sprite direction
@@ -119,21 +125,28 @@ class Player(pygame.sprite.Sprite):
         image = pygame.transform.flip(image, True, False)
         self.walking_frames_l.append(image)
 
-    def update(self):
+    def update(self, dt):
         """
         Updates the player position, handles platform and power up collision (will be moved to its own method)
+        Experimental movement that uses floats to allow velocities like 0.5. Also uses experimental change
+        to make movement FPS independent.
         """
-        self.calc_grav()
+
+        self.calc_grav(dt)
+
+        self.x_pos += float(self.change_x) * dt
+        self.rect.x = self.x_pos
 
         # If the player is moving, play the correct movement animation
-        self.rect.x += self.change_x
         if self.change_x != 0:
             pos = self.rect.x + self.level.world_shift
             if self.direction == "Right":
                 frame = (pos // 30) % len(self.walking_frames_r)
+                frame = int(frame)
                 self.image = self.walking_frames_r[frame]
             else:
                 frame = (pos // 30) % len(self.walking_frames_l)
+                frame = int(frame)
                 self.image = self.walking_frames_l[frame]
         # Else display the idle sprite
         else:
@@ -147,10 +160,12 @@ class Player(pygame.sprite.Sprite):
         for block in block_hit_list:
             if self.change_x > 0:
                 self.rect.right = block.rect.left
+                self.x_pos = self.rect.x
             elif self.change_x < 0:
                 self.rect.left = block.rect.right
+                self.x_pos = self.rect.x
 
-        # Handle power up collisions
+        # Handle item pick up collisions
         item_hit_list = pygame.sprite.spritecollide(self, self.level.item_list, True)
         for item in item_hit_list:
             item.collide()
@@ -158,15 +173,17 @@ class Player(pygame.sprite.Sprite):
         # Prevent the player from going off screen
         if self.rect.x <= 0:
             self.rect.x = 0
+            self.x_pos = 0
 
-        self.rect.y += self.change_y
+        self.y_pos += float(self.change_y) * dt
+        self.rect.y = self.y_pos
 
         # Handle platform collision after y-axis movement
         block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
         if block_hit_list:
             self.jumping = False
         else:
-            # Check if the player is not touching a platform after y-axis movement, set jumping sprite
+            # If the player is not touching a platform after y-axis movement, set jumping sprite
             self.rect.y += 2
             platform_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
             self.rect.y -= 2
@@ -179,13 +196,15 @@ class Player(pygame.sprite.Sprite):
         for block in block_hit_list:
             if self.change_y > 0:
                 self.rect.bottom = block.rect.top
+                self.y_pos = self.rect.y
             elif self.change_y < 0:
                 self.rect.top = block.rect.bottom
+                self.y_pos = self.rect.y
             self.change_y = 0
 
-            block.collide() # Call collide method for specific platforms (item block, moving platform)
+            block.collide(dt) # Call collide method for specific platforms (item block, moving platform)
 
-    def calc_grav(self):
+    def calc_grav(self, dt):
         """
         Handles gravity
         """
@@ -193,14 +212,13 @@ class Player(pygame.sprite.Sprite):
             self.change_y = 1
 
         else:
-            self.change_y += 0.35
+            self.change_y += 0.35 * dt
 
     def jump(self):
         """
         Moves the player down 2 pixels to check if he is on the ground, then sets him back up 2 pixels.
         If on the ground, sets y-velocity.
         """
-
         self.rect.y += 2
         platform_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
         self.rect.y -= 2
@@ -262,8 +280,5 @@ class Player(pygame.sprite.Sprite):
 
         if self.status == "Fire":
             if len(self.level.effect_list) < 4:
-                fireball = powerup.Fireball()
-                fireball.player = self
-                fireball.direction = self.direction
-                fireball.spawn(self.level)
+                fireball = powerup.Fireball(self, self.level, self.direction)
                 self.level.effect_list.add(fireball)

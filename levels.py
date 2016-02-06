@@ -24,11 +24,11 @@ class Level(object):
 
         self.background = None
 
-    def update(self):
-        self.platform_list.update()
-        self.enemy_list.update()
-        self.item_list.update()
-        self.effect_list.update()
+    def update(self, dt):
+        self.platform_list.update(dt)
+        self.enemy_list.update(dt)
+        self.item_list.update(dt)
+        self.effect_list.update(dt)
 
     def draw(self, screen):
         screen.fill(constants.BLUE)
@@ -43,30 +43,34 @@ class Level(object):
         """
         Offset all objects handled by the level class according to the viewport
         """
+
+        shift_x = shift_x
         if self.world_shift + shift_x > 0:
             pass
         else:
             self.world_shift += shift_x
             for platform in self.platform_list:
-                platform.rect.x += shift_x
+                platform.x_pos += shift_x
+                platform.rect.x = platform.x_pos
 
             for enemy in self.enemy_list:
-                enemy.rect.x += shift_x
+                enemy.x_pos += shift_x
+                enemy.rect.x = enemy.x_pos
 
             for item in self.item_list:
-                item.rect.x += shift_x
+                item.x_pos += shift_x
+                item.rect.x = item.x_pos
 
             for effect in self.effect_list:
-                effect.rect.x += shift_x
+                effect.x_pos += shift_x
+                effect.rect.x = effect.x_pos
 
     def create_enemy(self, x, y):
         """
         Creates an enemy instance at the parameter pixel location, gives the enemy instance a reference to
         all platforms. Adds the enemy to the Sprite list used for updating and drawing
         """
-        enemy = enemies.Enemy()
-        enemy.rect.x = x
-        enemy.rect.y = y
+        enemy = enemies.Enemy(x, y)
         enemy.level_platform_list = self.platform_list
         self.enemy_list.add(enemy)
 
@@ -75,9 +79,7 @@ class Level(object):
         Creates a Koopa enemy instance at the parameter pixel location, gives the enemy instance a reference to
         all platforms. Adds the enemy to the Sprite list used for updating and drawing
         """
-        enemy = enemies.Koopa()
-        enemy.rect.x = x
-        enemy.rect.y = y
+        enemy = enemies.Koopa(x, y)
         enemy.level_platform_list = self.platform_list
         self.enemy_list.add(enemy)
 
@@ -87,9 +89,7 @@ class Level(object):
         to the platform
         """
         for platform in level:
-            block = platforms.Platform(platform[0])
-            block.rect.x = platform[1]
-            block.rect.y = platform[2]
+            block = platforms.Platform(platform[0], platform[1], platform[2])
             block.player = self.player
             self.platform_list.add(block)
 
@@ -100,9 +100,8 @@ class Level(object):
         """
         for platform in level:
             #print platform
-            block = platforms.MovingPlatform(platforms.STONE_PLATFORM_MIDDLE)
-            block.rect.x = platform[0]
-            block.rect.y = platform[1]
+            block = platforms.MovingPlatform(platforms.STONE_PLATFORM_MIDDLE,
+                                             platform[0], platform[1])
             block.boundary_left = platform[2]
             block.boundary_right = platform[3]
             block.boundary_top = platform[4]
@@ -118,9 +117,7 @@ class Level(object):
         Takes a list as parameter. Creates an item block.
         """
         for platform in level:
-            block = platforms.SpecialBlock(platforms.POWER_UP)
-            block.rect.x = platform[0]
-            block.rect.y = platform[1]
+            block = platforms.SpecialBlock(platforms.POWER_UP, platform[0], platform[1])
             block.player = self.player
             block.level = self
             self.platform_list.add(block)

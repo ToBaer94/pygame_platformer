@@ -8,14 +8,16 @@ img_dir = path.join(path.dirname(__file__), "enemy")
 
 class Enemy(pygame.sprite.Sprite):
     """Base enemy class used for testing. Doesnt have an animation set"""
-    def __init__(self):
+    def __init__(self, x, y):
         super(Enemy, self).__init__()
         self.image = pygame.image.load(path.join(img_dir, "base_enemy", "base_enemy.png")).convert_alpha()
         self.image = pygame.transform.scale(self.image, (35, 38))
 
         self.rect = self.image.get_rect()
-        self.rect.x = 300
-        self.rect.y = 400 - self.rect.height
+        self.rect.x = x
+        self.rect.y = y
+        self.x_pos = x
+        self.y_pos = y
 
         self.change_x = -1
         self.change_y = 0
@@ -24,37 +26,43 @@ class Enemy(pygame.sprite.Sprite):
 
         self.level_platform_list = None
 
-    def update(self):
+    def update(self, dt):
         """
         Moves the enemy, handles platform collision.
         Uses flip() method to flip the sprite when hitting a wall
         on the x-axis
         """
-        self.calc_grav()
+        self.calc_grav(dt)
 
-        self.rect.y += self.change_y
+        self.y_pos += float(self.change_y) * dt
+        self.rect.y = self.y_pos
 
         block_hit_list = pygame.sprite.spritecollide(self, self.level_platform_list, False)
         for block in block_hit_list:
             if self.change_y > 0:
                 self.rect.bottom = block.rect.top
+                self.y_pos = self.rect.y
             elif self.change_y < 0:
                 self.rect.top = block.rect.bottom
+                self.y_pos = self.rect.y
             self.change_y = 0
             #block.collide()
             if isinstance(block, platforms.MovingPlatform):
                 self.rect.x += block.change_x
 
-        self.rect.x += self.change_x
+        self.x_pos += float(self.change_x) * dt
+        self.rect.x = self.x_pos
 
         block_hit_list = pygame.sprite.spritecollide(self, self.level_platform_list, False)
         for block in block_hit_list:
             if self.change_x < 0:
                 self.rect.left = block.rect.right
+                self.x_pos = self.rect.x
                 self.change_x *= -1
                 self.flip()
             elif self.change_x > 0:
                 self.rect.right = block.rect.left
+                self.x_pos = self.rect.x
                 self.change_x *= -1
                 self.flip()
 
@@ -71,18 +79,21 @@ class Enemy(pygame.sprite.Sprite):
             self.direction = "Right"
             self.image = pygame.transform.flip(self.image, True, False)
             self.rect = self.image.get_rect(topleft = (x, y))
+            self.x_pos = self.rect.x
+
 
         if self.direction == "Right" and self.change_x < 0:
             self.direction = "Left"
             self.image = pygame.transform.flip(self.image, True, False)
             self.rect = self.image.get_rect(topleft=(x, y))
+            self.x_pos = self.rect.x
 
-    def calc_grav(self):
+    def calc_grav(self, dt):
         if self.change_y == 0:
             self.change_y = 1
 
         else:
-            self.change_y += 0.35
+            self.change_y += 0.35 * dt
 
 
 class Koopa(Enemy):
@@ -90,8 +101,8 @@ class Koopa(Enemy):
     More advanced enemy. Turns around at ledges of platforms and uses
     sprite animation.
     """
-    def __init__(self):
-        super(Koopa, self).__init__()
+    def __init__(self, x, y):
+        super(Koopa, self).__init__(x, y)
 
         self.image = pygame.image.load(path.join(img_dir, "worm", "worm.png")).convert_alpha()
         self.rect = self.image.get_rect()
@@ -131,9 +142,9 @@ class Koopa(Enemy):
                 self.frame += 1
                 self.frame %= 8
 
-    def update(self):
+    def update(self, dt):
         """ Handles movement and platform collision """
-        self.calc_grav()
+        self.calc_grav(dt)
         self.animate()
 
         right = self.change_x > 0
@@ -152,28 +163,35 @@ class Koopa(Enemy):
                 self.change_x *= -1
                 self.flip()
 
-        self.rect.y += self.change_y
+        self.y_pos += float(self.change_y) * dt
+        self.rect.y = self.y_pos
 
         block_hit_list = pygame.sprite.spritecollide(self, self.level_platform_list, False)
         for block in block_hit_list:
             self.onground = True
             if self.change_y > 0:
                 self.rect.bottom = block.rect.top
+                self.y_pos = self.rect.y
             elif self.change_y < 0:
                 self.rect.top = block.rect.bottom
+                self.y_pos = self.rect.y
+
             self.change_y = 0
             if isinstance(block, platforms.MovingPlatform):
                 self.rect.x += block.change_x
 
-        self.rect.x += self.change_x
+        self.x_pos += float(self.change_x) * dt
+        self.rect.x = self.x_pos
 
         block_hit_list = pygame.sprite.spritecollide(self, self.level_platform_list, False)
         for block in block_hit_list:
             if self.change_x < 0:
                 self.rect.left = block.rect.right
+                self.x_pos = self.rect.x
                 self.change_x *= -1
                 self.flip()
             elif self.change_x > 0:
                 self.rect.right = block.rect.left
+                self.x_pos = self.rect.x
                 self.change_x *= -1
                 self.flip()

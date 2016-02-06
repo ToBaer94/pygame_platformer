@@ -25,16 +25,24 @@ def main():
     active_sprite_list = pygame.sprite.Group() # Sprite group used for the player independent of the level
     player.level = current_level # Set first level in player class
 
-    # Set position in first level
-    player.rect.x = 120
-    player.rect.y = 580 - player.rect.height
     active_sprite_list.add(player)
 
     done = False
 
     clock = pygame.time.Clock()
 
+    target_fps = 60.0 # Intended FPS maximum
+    ms_per_sec = 1000.0 # Ms in one second
+    desired_frame_time = float(ms_per_sec) / float(target_fps) # Amount of ms per frame at target_fps
+    max_delta_time = 1.0 # Max step the game physics get moved by
+
+    FPS = 60
+
     while not done:
+
+        frame_time = clock.tick(FPS)
+        total_delta_time = float(frame_time) / float(desired_frame_time) # Total amount of steps
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
@@ -46,6 +54,10 @@ def main():
                     player.go_right()
                 if event.key == pygame.K_UP:
                     player.jump()
+                if event.key == pygame.K_a:
+                    FPS -= 2
+                if event.key == pygame.K_s:
+                    FPS += 2
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT and player.change_x < 0:
@@ -56,37 +68,50 @@ def main():
                 if event.key == pygame.K_SPACE:
                     player.fire()
 
-        active_sprite_list.update()
-        current_level.update()
+        while total_delta_time > 0.0: # While there still have to be made steps to keep physics constant
+            # Update physics by 1 step until enough steps have been made
+            delta_time = min(total_delta_time, max_delta_time)
+            current_level.update(delta_time) # Current level (enemies, platforms, powerups) update
+            active_sprite_list.update(delta_time) # Player update
+            total_delta_time -= delta_time
+
 
         # Camera / Viewport control
-        if player.rect.right >= 500:
-            diff = player.rect.right - 500
-            player.rect.right = 500
+        if player.x_pos >= 500:
+            diff = player.x_pos - 500.0
+            player.x_pos = 500
+            player.rect.x = player.x_pos
             current_level.shift_world(-diff)
 
-        if player.rect.left <= 120:
-            diff = 120 - player.rect.left
+        if player.x_pos <= 120:
+            diff = 120 - player.x_pos
             if player.level.world_shift >= -5:
                 pass
             else:
-                player.rect.left = 120
+                player.x_pos = 120
+                player.rect.x = player.x_pos
             current_level.shift_world(diff)
 
+
         # Level control
-        if current_level.world_shift < current_level.level_limit and player.rect.x >= 450:
-            player.rect.x = 120
+        if current_level.world_shift < current_level.level_limit and player.x_pos >= 450:
+            player.x_pos = 120
+            player.rect.x = player.x_pos
             if current_level_no < len(level_list)-1:
                 current_level_no += 1
                 current_level = level_list[current_level_no]
                 player.level = current_level
-                player.rect.y = 560 - player.rect.height
+                player.y_pos = 560 - player.rect.height
+                player.rect.y = player.y_pos
             else:
-                #If last level, rest viewport and player position to level start
+                # If last level, rest viewport and player position to level start
                 current_level.shift_world((-current_level.world_shift))
                 current_level.world_shift = 0
-                player.rect.y = 560 - player.rect.height
+                player.y_pos = 560 - player.rect.height
+                player.rect.y = player.y_pos
                 print "reached the end of the last level"
+
+
 
         # Enemy collision detection (Probably to be moved out of the main file later)
         enemy_hit_list = pygame.sprite.spritecollide(player, player.level.enemy_list, True)
@@ -111,11 +136,9 @@ def main():
             print "Game over"
             done = True
 
-        # Update everything
+        # Draw everything
         current_level.draw(screen)
         active_sprite_list.draw(screen)
-
-        clock.tick(60)
 
         pygame.display.flip()
 
@@ -123,53 +146,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-        
-        
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
-        
-
-        
-        
