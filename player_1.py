@@ -39,10 +39,13 @@ class Player(pygame.sprite.Sprite):
         self.status = "Small" # Power up status
 
         self.direction = "Right" # Sprite direction
+
         self.change_x = 0
         self.change_y = 0
 
         self.level = None
+
+        self.dead = False
 
     def set_walking_animation(self):
         """
@@ -178,6 +181,8 @@ class Player(pygame.sprite.Sprite):
         self.y_pos += float(self.change_y) * dt
         self.rect.y = self.y_pos
 
+        self.enemy_collide()
+
         # Handle platform collision after y-axis movement
         block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
         if block_hit_list:
@@ -203,6 +208,24 @@ class Player(pygame.sprite.Sprite):
             self.change_y = 0
 
             block.collide(dt) # Call collide method for specific platforms (item block, moving platform)
+
+    def enemy_collide(self):
+        enemy_hit_list = pygame.sprite.spritecollide(self, self.level.enemy_list, True)
+        for enemy in enemy_hit_list:
+            # No damage is taken when jumping on top
+            if self.rect.collidepoint(enemy.rect.midtop) \
+                    or self.rect.collidepoint(enemy.rect.x + 7, enemy.rect.y)\
+                    or self.rect.collidepoint(enemy.rect.x + enemy.rect.width - 7, enemy.rect.y):
+                print "hit on top"
+            else:
+                # If the player has one, remove the power_up
+                if self.status == "Fire":
+                    self.hurt()
+                    print self.status
+
+                else:
+                    print "You're dead"
+                    self.dead = True
 
     def calc_grav(self, dt):
         """

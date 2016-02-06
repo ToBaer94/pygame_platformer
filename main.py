@@ -4,145 +4,187 @@ from player_1 import Player
 import levels
 
 
-def main():
+class GameEngine(object):
+    def __init__(self):
+        pygame.init()
+        pygame.display.set_caption("Platform Jumper")
+        self.size = [SCREEN_WIDTH, SCREEN_HEIGHT]
+        self.screen = pygame.display.set_mode(self.size)
 
-    pygame.init()
+        self.target_fps = 60.0 # Intended FPS maximum
+        self.ms_per_sec = 1000.0 # Ms in one second
+        self.desired_frame_time = float(self.ms_per_sec) / float(self.target_fps) # Amount of ms per frame at target_fps
+        self.max_delta_time = 1.0 # Max step the game physics get moved by
 
-    size = [SCREEN_WIDTH, SCREEN_HEIGHT]
-    screen = pygame.display.set_mode(size)
+        self.player = Player() # Create the player
 
-    pygame.display.set_caption("Platform Jumper")
+        self.level_list = [] # Set up the list of levels
+        self.level_list.append(levels.Level_01(self.player))
+        #level_list.append( Level_02(player))
 
-    player = Player() # Create the player
+        self.current_level_no = 0
+        self.current_level = self.level_list[self.current_level_no]
 
-    level_list = [] # Set up the list of levels
-    level_list.append(levels.Level_01(player))
-    #level_list.append( Level_02(player))
+        self.active_sprite_list = pygame.sprite.Group() # Sprite group used for the player independent of the level
+        self.player.level = self.current_level # Set first level in player class
 
-    current_level_no = 0
-    current_level = level_list[current_level_no]
+        self.active_sprite_list.add(self.player)
 
-    active_sprite_list = pygame.sprite.Group() # Sprite group used for the player independent of the level
-    player.level = current_level # Set first level in player class
+        self.FPS = 60
+        self.clock = pygame.time.Clock()
+        self.done = False
+        self.game_over = True
 
-    active_sprite_list.add(player)
+    def run(self):
+        while not self.done:
+            frame_time = self.clock.tick(self.FPS)
 
-    done = False
+            if self.game_over:
+                self.game_over_reset()
 
-    clock = pygame.time.Clock()
+            self.handle_events()
+            self.update_everything(frame_time)
+            self.draw_everything()
 
-    target_fps = 60.0 # Intended FPS maximum
-    ms_per_sec = 1000.0 # Ms in one second
-    desired_frame_time = float(ms_per_sec) / float(target_fps) # Amount of ms per frame at target_fps
-    max_delta_time = 1.0 # Max step the game physics get moved by
-
-    FPS = 60
-
-    while not done:
-
-        frame_time = clock.tick(FPS)
-        total_delta_time = float(frame_time) / float(desired_frame_time) # Total amount of steps
-
+    def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                done = True
+                self.done = True
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    player.go_left()
+                    self.player.go_left()
                 if event.key == pygame.K_RIGHT:
-                    player.go_right()
+                    self.player.go_right()
                 if event.key == pygame.K_UP:
-                    player.jump()
+                    self.player.jump()
                 if event.key == pygame.K_a:
-                    FPS -= 2
+                    self.FPS -= 2
                 if event.key == pygame.K_s:
-                    FPS += 2
+                    self.FPS += 2
 
             if event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT and player.change_x < 0:
-                    player.stop()
-                if event.key == pygame.K_RIGHT and player.change_x > 0:
-                    player.stop()
+                if event.key == pygame.K_LEFT and self.player.change_x < 0:
+                    self.player.stop()
+                if event.key == pygame.K_RIGHT and self.player.change_x > 0:
+                    self.player.stop()
 
                 if event.key == pygame.K_SPACE:
-                    player.fire()
+                    self.player.fire()
+
+    def update_everything(self, frame_time):
+        total_delta_time = float(frame_time) / float(self.desired_frame_time) # Total amount of steps
 
         while total_delta_time > 0.0: # While there still have to be made steps to keep physics constant
             # Update physics by 1 step until enough steps have been made
-            delta_time = min(total_delta_time, max_delta_time)
-            current_level.update(delta_time) # Current level (enemies, platforms, powerups) update
-            active_sprite_list.update(delta_time) # Player update
+            delta_time = min(total_delta_time, self.max_delta_time)
+            self.current_level.update(delta_time) # Current level (enemies, platforms, powerups) update
+            self.active_sprite_list.update(delta_time) # Player update
             total_delta_time -= delta_time
 
+        self.move_camera()
 
-        # Camera / Viewport control
-        if player.x_pos >= 500:
-            diff = player.x_pos - 500.0
-            player.x_pos = 500
-            player.rect.x = player.x_pos
-            current_level.shift_world(-diff)
+        if self.current_level.world_shift < self.current_level.level_limit and self.player.x_pos >= 450:
+            self.switch_level()
 
-        if player.x_pos <= 120:
-            diff = 120 - player.x_pos
-            if player.level.world_shift >= -5:
+        if self.player.rect.top > SCREEN_HEIGHT or self.player.dead:
+            print "Game over"
+            self.game_over = True
+
+    def move_camera(self):
+        if self.player.x_pos >= 500:
+            diff = self.player.x_pos - 500.0
+            self.player.x_pos = 500
+            self.player.rect.x = self.player.x_pos
+            self.current_level.shift_world(-diff)
+
+        if self.player.x_pos <= 120:
+            diff = 120 - self.player.x_pos
+            if self.player.level.world_shift >= -5:
                 pass
             else:
-                player.x_pos = 120
-                player.rect.x = player.x_pos
-            current_level.shift_world(diff)
+                self.player.x_pos = 120
+                self.player.rect.x = self.player.x_pos
+            self.current_level.shift_world(diff)
 
+    def switch_level(self):
+        self.player.x_pos = 120
+        self.player.rect.x = self.player.x_pos
+        if self.current_level_no < len(self.level_list)-1:
+            self.current_level_no += 1
+            self.current_level = self.level_list[self.current_level_no]
+            self.player.level = self.current_level
+            self.player.y_pos = 560 - self.player.rect.height
+            self.player.rect.y = self.player.y_pos
+        else:
+            # If last level, rest viewport and player position to level start
+            self.current_level.shift_world((-self.current_level.world_shift))
+            self.current_level.world_shift = 0
+            self.player.y_pos = 560 - self.player.rect.height
+            self.player.rect.y = self.player.y_pos
+            print "reached the end of the last level"
 
-        # Level control
-        if current_level.world_shift < current_level.level_limit and player.x_pos >= 450:
-            player.x_pos = 120
-            player.rect.x = player.x_pos
-            if current_level_no < len(level_list)-1:
-                current_level_no += 1
-                current_level = level_list[current_level_no]
-                player.level = current_level
-                player.y_pos = 560 - player.rect.height
-                player.rect.y = player.y_pos
-            else:
-                # If last level, rest viewport and player position to level start
-                current_level.shift_world((-current_level.world_shift))
-                current_level.world_shift = 0
-                player.y_pos = 560 - player.rect.height
-                player.rect.y = player.y_pos
-                print "reached the end of the last level"
-
-
-
-        # Enemy collision detection (Probably to be moved out of the main file later)
-        enemy_hit_list = pygame.sprite.spritecollide(player, player.level.enemy_list, True)
-        for enemy in enemy_hit_list:
-            # No damage is taken when jumping on top
-            if player.rect.collidepoint(enemy.rect.midtop) \
-                    or player.rect.collidepoint(enemy.rect.x + 7, enemy.rect.y)\
-                    or player.rect.collidepoint(enemy.rect.x + enemy.rect.width - 7, enemy.rect.y):
-                print "hit on top"
-            else:
-                # If the player has one, remove the power_up
-                if player.status == "Fire":
-                    player.hurt()
-                    print player.status
-                # Else end the game (placeholder till i create a game over screen and/or extra lives)
-                else:
-                    print "You're dead"
-                    done = True
-
-        # End the game if the player falls into a gap (placeholder)
-        if player.rect.top > SCREEN_HEIGHT:
-            print "Game over"
-            done = True
-
-        # Draw everything
-        current_level.draw(screen)
-        active_sprite_list.draw(screen)
+    def draw_everything(self):
+        self.current_level.draw(self.screen)
+        self.active_sprite_list.draw(self.screen)
 
         pygame.display.flip()
 
-    pygame.quit()
+    def game_over_reset(self):
+        self.show_go_screen()
+        ###
+        self.player = Player() # Create the player
+
+        self.level_list = [] # Set up the list of levels
+        self.level_list.append(levels.Level_01(self.player))
+        #level_list.append( Level_02(player))
+
+        self.current_level_no = 0
+        self.current_level = self.level_list[self.current_level_no]
+
+        self.active_sprite_list = pygame.sprite.Group() # Sprite group used for the player independent of the level
+        self.player.level = self.current_level # Set first level in player class
+
+        self.active_sprite_list.add(self.player)
+        ###
+        self.game_over = False
+
+    def show_go_screen(self):
+        self.screen.fill(BLACK)
+        self.draw_text(self.screen, "Platform Jumper", 64, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4)
+        self.draw_text(self.screen, "Arrow keys to move, up to jump, space to throw a fireball after picking up"
+                          " a mushroom", 22,  SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        self.draw_text(self.screen, "Press space to start the game", 18, SCREEN_WIDTH // 2,
+                  SCREEN_HEIGHT * 3 // 4)
+        pygame.display.flip()
+        waiting = True
+        while waiting:
+
+            #self.clock.tick(self.FPS)
+            for event in pygame.event.get():
+
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    self.done = True
+
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_SPACE:
+                        waiting = False
+
+    def draw_text(self, screen, text, size, x, y):
+        font = pygame.font.Font(pygame.font.match_font("comic sans"), size)
+        text_surface = font.render(text, True, WHITE)
+        text_rect = text_surface.get_rect()
+        text_rect.midtop = (x, y)
+        screen.blit(text_surface, text_rect)
+
+class GameLogic(object):
+    pass
+
+
 
 if __name__ == "__main__":
-    main()
+
+    game = GameEngine()
+    logic = GameLogic()
+    game.run()

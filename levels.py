@@ -174,7 +174,7 @@ class Level_01(Level):
         self.create_moving_platform(level_moving, player) # Create moving platforms
 
         for x in range(3):
-            self.create_enemy(x*100 + 400, 540) # Spawn base_enemies
+            self.create_enemy(x*100 + 400, 300) # Spawn base_enemies
 
         for x in range(2):
             self.create_koopa(400 + 100 * x, 100) # Spawn Koopas
