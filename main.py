@@ -84,7 +84,6 @@ class GameEngine(object):
         elif not key_pressed[pygame.K_RIGHT] and self.player.acc.x > 0:
             self.player.stop()
 
-
     def update_everything(self, frame_time):
         total_delta_time = float(frame_time) / float(self.desired_frame_time) # Total amount of steps
 
@@ -113,7 +112,7 @@ class GameEngine(object):
 
         if self.player.pos.x <= 120:
             diff = 120 - self.player.pos.x
-            if self.player.level.world_shift >= -5:
+            if self.player.level.world_shift >= -7:
                 pass
             else:
                 self.player.pos.x = 120

@@ -36,6 +36,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = 580 - self.rect.height
 
         self.pos = vector(120, 580 - self.rect.height)
+
         self.vel = vector(0, 0)
         self.acc = vector(0, 0)
 
@@ -137,13 +138,23 @@ class Player(pygame.sprite.Sprite):
 
         self.calc_grav(dt)
 
-        self.acc.x -= self.vel.x * 0.12 * dt
-        self.vel.x += float(self.acc.x) * dt
-        self.pos.x += self.vel.x * dt + 0.5 * self.acc.x * dt * dt
+        self.vel.x += self.acc.x * dt
+        if self.vel.x > 5:
+            self.vel.x = 5
+        if self.vel.x < -5:
+            self.vel.x = -5
+        if self.acc.x == 0 and 5 >= self.vel.x > 0:
+            self.vel.x -= 0.25 * dt
+        if self.acc.x == 0 and -5 <= self.vel.x < 0:
+            self.vel.x += 0.25 * dt
+        if -0.5 < self.vel.x < 0.5 and self.acc.x == 0:
+            self.vel.x = 0
+
+        self.pos.x += self.vel.x * dt
         self.rect.x = self.pos.x
 
         # If the player is moving, play the correct movement animation
-        if 0.2 < self.vel.x or self.vel.x < -0.2:
+        if self.vel.x != 0:
             pos = self.rect.x + self.level.world_shift
             if self.direction == "Right":
                 frame = (pos // 20) % len(self.walking_frames_r)
@@ -185,8 +196,8 @@ class Player(pygame.sprite.Sprite):
             self.pos.x = 1
             self.vel.x = 0
 
-        self.vel.y += float(self.acc.y) * dt
-        self.pos.y += self.vel.y * dt + 0.5 * self.acc.y * dt * dt
+        self.vel.y += self.acc.y * dt
+        self.pos.y += self.vel.y * dt
         self.rect.y = self.pos.y
 
         self.enemy_collide()
@@ -244,7 +255,7 @@ class Player(pygame.sprite.Sprite):
             self.vel.y = 1
 
         else:
-            self.acc.y = 0.35 * dt
+            self.acc.y = 0.35
 
 
     def jump(self):
