@@ -13,7 +13,6 @@ class Mushroom(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super(Mushroom, self).__init__()
         self.image = pygame.image.load(path.join(img_dir, "mushroomRed.png")).convert_alpha()
-        self.image = pygame.transform.scale(self.image, (35, 35))
 
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -28,7 +27,7 @@ class Mushroom(pygame.sprite.Sprite):
 
         self.player = None
 
-        self.level_platform_list = None
+        self.level = None
 
     def collide(self):
         """ Called when the player collides with the mushroom """
@@ -40,30 +39,12 @@ class Mushroom(pygame.sprite.Sprite):
         self.y_pos += self.change_y * dt
         self.rect.y = self.y_pos
 
-        block_hit_list = pygame.sprite.spritecollide(self, self.level_platform_list, False)
-        for block in block_hit_list:
-            if self.change_y > 0:
-                self.rect.bottom = block.rect.top
-                self.y_pos = self.rect.y
-            elif self.change_y < 0:
-                self.rect.top = block.rect.bottom
-                self.y_pos = self.rect.y
-            self.change_y = 0
+        self.world_y_collision()
 
         self.x_pos += self.change_x * dt
         self.rect.x = self.x_pos
 
-        block_hit_list = pygame.sprite.spritecollide(self, self.level_platform_list, False)
-        for block in block_hit_list:
-            if self.change_x < 0:
-                self.rect.left = block.rect.right
-                self.x_pos = self.rect.x
-                self.change_x *= -1
-
-            elif self.change_x > 0:
-                self.rect.right = block.rect.left
-                self.x_pos = self.rect.x
-                self.change_x *= -1
+        self.world_x_collision()
 
         if self.y_pos > 600:
             self.kill()
@@ -75,6 +56,51 @@ class Mushroom(pygame.sprite.Sprite):
         else:
             self.change_y += 0.25 * dt
 
+    def world_x_collision(self):
+        for block in self.level.platform_list:
+            if self.rect.colliderect(block):
+                if self.change_x < 0:
+                    self.rect.left = block.rect.right
+                    self.x_pos = self.rect.x
+                    self.change_x *= -1
+
+                elif self.change_x > 0:
+                    self.rect.right = block.rect.left
+                    self.x_pos = self.rect.x
+                    self.change_x *= -1
+
+        for block in self.level.blockers:
+            if self.rect.colliderect(block):
+                if self.change_x < 0:
+                    self.rect.left = block.right
+                    self.x_pos = self.rect.x
+                    self.change_x *= -1
+
+                elif self.change_x > 0:
+                    self.rect.right = block.left
+                    self.x_pos = self.rect.x
+                    self.change_x *= -1
+
+    def world_y_collision(self):
+        for block in self.level.platform_list:
+            if self.rect.colliderect(block):
+                if self.change_y > 0:
+                    self.rect.bottom = block.rect.top
+                    self.y_pos = self.rect.y
+                elif self.change_y < 0:
+                    self.rect.top = block.rect.bottom
+                    self.y_pos = self.rect.y
+                self.change_y = 0
+
+        for block in self.level.blockers:
+            if self.rect.colliderect(block):
+                if self.change_y > 0:
+                    self.rect.bottom = block.top
+                    self.y_pos = self.rect.y
+                elif self.change_y < 0:
+                    self.rect.top = block.bottom
+                    self.y_pos = self.rect.y
+                self.change_y = 0
 
 class Fireball(pygame.sprite.Sprite):
     """ Class used for the behavior of the fireball by the player. Moves in a jumping motion"""
@@ -89,7 +115,6 @@ class Fireball(pygame.sprite.Sprite):
         self.direction = direction
 
         self.level = level
-        self.level_platform_list = self.level.platform_list
 
         self.change_x = 0
         self.change_y = 0
@@ -130,7 +155,51 @@ class Fireball(pygame.sprite.Sprite):
         self.y_pos += self.change_y * dt
         self.rect.y = self.y_pos
 
-        block_hit_list = pygame.sprite.spritecollide(self, self.level_platform_list, False)
+        self.world_y_collide()
+
+        if self.rect.y > 600:
+            self.kill()
+
+        self.x_pos += self.change_x * dt
+        self.rect.x = self.x_pos
+
+        self.world_x_collide()
+
+        enemy_hit_list = pygame.sprite.spritecollide(self, self.level.enemy_list, True)
+        if enemy_hit_list:
+            self.kill()
+
+        now = pygame.time.get_ticks()
+        if now - self.last_update > 2500:
+            self.kill()
+
+    def world_x_collide(self):
+        block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
+        for block in block_hit_list:
+            if self.change_x < 0:
+                self.rect.x += 3
+                self.x_pos = self.rect.x
+                self.change_x *= -1
+
+            elif self.change_x > 0:
+                self.rect.x -= 3
+                self.x_pos = self.rect.x
+                self.change_x *= -1
+
+        for block in self.level.blockers:
+            if self.rect.colliderect(block):
+                if self.change_x < 0:
+                    self.rect.x += 3
+                    self.x_pos = self.rect.x
+                    self.change_x *= -1
+
+                elif self.change_x > 0:
+                    self.rect.x -= 3
+                    self.x_pos = self.rect.x
+                    self.change_x *= -1
+
+    def world_y_collide(self):
+        block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
         for block in block_hit_list:
             if self.direction_horizontal == "Down":
                 self.rect.bottom = block.rect.top
@@ -143,31 +212,18 @@ class Fireball(pygame.sprite.Sprite):
                 self.y_pos = self.rect.y
                 self.change_y = 4
 
-        if self.rect.y > 600:
-            self.kill()
-
-        self.x_pos += self.change_x * dt
-        self.rect.x = self.x_pos
-
-        enemy_hit_list = pygame.sprite.spritecollide(self, self.level.enemy_list, True)
-        if enemy_hit_list:
-            self.kill()
-
-        block_hit_list = pygame.sprite.spritecollide(self, self.level_platform_list, False)
-        for block in block_hit_list:
-            if self.change_x < 0:
-                self.rect.x += 3
-                self.x_pos = self.rect.x
-                self.change_x *= -1
-
-            elif self.change_x > 0:
-                self.rect.x -= 3
-                self.x_pos = self.rect.x
-                self.change_x *= -1
-
-        now = pygame.time.get_ticks()
-        if now - self.last_update > 4000:
-            self.kill()
+        for block in self.level.blockers:
+            if self.rect.colliderect(block):
+                if self.direction_horizontal == "Down":
+                    self.rect.bottom = block.top
+                    self.rect.y -= 5
+                    self.y_pos = self.rect.y
+                    self.change_y = -4
+                else:
+                    self.rect.top = block.bottom
+                    self.rect.y += 5
+                    self.y_pos = self.rect.y
+                    self.change_y = 4
 
     def rotate(self, dt):
         now = pygame.time.get_ticks()
