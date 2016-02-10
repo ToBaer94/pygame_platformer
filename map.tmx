@@ -1,40 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="44" height="9" tilewidth="70" tileheight="70" nextobjectid="66">
- <tileset firstgid="1" name="land" tilewidth="70" tileheight="70" spacing="2" tilecount="156" columns="12">
-  <image source="world/tiles_spritesheet.png" width="914" height="936"/>
- </tileset>
- <tileset firstgid="157" name="sky" tilewidth="70" tileheight="70" spacing="2" tilecount="9" columns="3">
-  <image source="world/bg.png" width="256" height="256"/>
- </tileset>
- <tileset firstgid="166" name="sky objects" tilewidth="129" tileheight="106" tilecount="9" columns="0">
-  <tile id="0">
-   <image width="128" height="71" source="world/cloud1.png"/>
-  </tile>
-  <tile id="1">
-   <image width="129" height="71" source="world/cloud3.png"/>
-  </tile>
-  <tile id="2">
-   <image width="129" height="71" source="world/cloud2.png"/>
-  </tile>
-  <tile id="3">
-   <image width="70" height="70" source="world/plant.png"/>
-  </tile>
-  <tile id="4">
-   <image width="70" height="70" source="world/plantPurple.png"/>
-  </tile>
-  <tile id="5">
-   <image width="70" height="70" source="world/rock.png"/>
-  </tile>
-  <tile id="6">
-   <image width="70" height="70" source="world/bush.png"/>
-  </tile>
-  <tile id="7">
-   <image width="70" height="70" source="world/cactus.png"/>
-  </tile>
-  <tile id="8">
-   <image width="48" height="106" source="world/hill_small.png"/>
-  </tile>
- </tileset>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="44" height="9" tilewidth="70" tileheight="70" nextobjectid="75">
+ <tileset firstgid="1" source="land.tsx"/>
+ <tileset firstgid="157" source="sky.tsx"/>
+ <tileset firstgid="166" source="sky objects.tsx"/>
  <layer name="bg" width="44" height="9">
   <data encoding="csv">
 157,157,157,157,157,157,157,158,157,160,161,157,157,157,158,157,158,157,157,157,157,157,157,157,157,157,157,157,157,157,157,157,157,157,157,157,157,157,157,157,157,157,157,158,
@@ -108,7 +76,7 @@
   <object id="29" name="blocker" x="980" y="350" width="70" height="280"/>
   <object id="30" name="blocker" x="910" y="420" width="70" height="210"/>
   <object id="32" name="blocker" x="630" y="490" width="280" height="140"/>
-  <object id="33" name="blocker" x="0" y="560" width="630" height="70"/>
+  <object id="33" name="blocker" x="0" y="560" width="630" height="70" visible="0"/>
   <object id="35" name="blocker" x="1680" y="490" width="490" height="140"/>
   <object id="36" name="blocker" x="2170" y="560" width="910" height="70"/>
   <object id="51" name="enemy2" x="1444" y="195" width="26" height="37"/>
@@ -117,5 +85,9 @@
   <object id="54" name="movingplat" x="783" y="141.333" width="167.333" height="55.3333"/>
   <object id="64" name="itemblock" x="210" y="280" width="70" height="70"/>
   <object id="65" name="itemblock" x="700" y="210" width="70" height="70"/>
+  <object id="66" name="lowb" x="0" y="612.5" width="3080" height="17.5"/>
+  <object id="68" name="leftb" x="0" y="0" width="17.5" height="630"/>
+  <object id="73" name="rightb" x="3062.5" y="0" height="630"/>
+  <object id="74" name="upb" x="0" y="0" width="3080" height="17.5"/>
  </objectgroup>
 </map>

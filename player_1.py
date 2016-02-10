@@ -54,6 +54,7 @@ class Player(pygame.sprite.Sprite):
             if properties["name"] == "Start":
                 self.pos.x = properties['x']
                 self.pos.y = properties['y']
+                print self.pos.x, self.pos.y
 
         self.rect.x = self.pos.x
         self.rect.y = self.pos.y

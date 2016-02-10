@@ -10,6 +10,7 @@ class GameEngine(object):
         pygame.display.set_caption("Platform Jumper")
         self.size = [SCREEN_WIDTH, SCREEN_HEIGHT]
         self.screen = pygame.display.set_mode(self.size)
+        self.screen_rect = self.screen.get_rect()
 
         self.target_fps = 60.0 # Intended FPS maximum
         self.ms_per_sec = 1000.0 # Ms in one second
@@ -111,37 +112,39 @@ class GameEngine(object):
             self.game_over = True
 
     def move_camera_x(self):
-        if self.player.pos.x >= 500:
-            diff = self.player.pos.x - 500.0
-            self.player.pos.x = 500
-            self.player.rect.x = self.player.pos.x
-            self.current_level.shift_world_x(-diff)
+        if self.player.pos.x >= 500.0:
+            if self.screen_rect.colliderect(self.current_level.right_boundary):
+                pass
+            else:
+                diff = self.player.pos.x - 500.0
+                self.player.pos.x = 500
+                self.player.rect.x = self.player.pos.x
+                self.current_level.shift_world_x(-diff)
 
         if self.player.pos.x <= 120:
-            diff = 120 - self.player.pos.x
-            if self.player.level.world_shift_x >= -7:
+            if self.screen_rect.colliderect(self.current_level.left_boundary):
                 pass
             else:
+                diff = 120 - self.player.pos.x
                 self.player.pos.x = 120
                 self.player.rect.x = self.player.pos.x
-            self.current_level.shift_world_x(diff)
+                self.current_level.shift_world_x(diff)
 
     def move_camera_y(self):
-        print self.player.pos
         if self.player.pos.y > 380.0:
-            diff = self.player.pos.y - 380.0
-            if self.current_level.world_shift_y <= -150:
+            if self.screen_rect.colliderect(self.current_level.bottom_boundary):
                 pass
             else:
+                diff = self.player.pos.y - 380.0
                 self.player.pos.y = 380.0
                 self.player.rect.y = self.player.pos.y
                 self.current_level.shift_world_y(-diff)
 
         if self.player.pos.y <= 120:
-            diff = 120 - self.player.pos.y
-            if self.player.level.world_shift_y >= 100:
+            if self.screen_rect.colliderect(self.current_level.top_boundary):
                 pass
             else:
+                diff = 120 - self.player.pos.y
                 self.player.pos.y += diff
                 self.player.rect.y = self.player.pos.y
                 self.current_level.shift_world_y(diff)

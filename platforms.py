@@ -138,7 +138,6 @@ class MovingPlatform(Platform):
             self.player.pos.y -= 2
             self.player.rect.y = self.player.pos.y
             if hit:
-                print "yey"
                 self.player.pos.x += self.change_x * dt
                 self.player.rect.x = self.player.pos.x
 

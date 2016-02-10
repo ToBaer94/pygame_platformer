@@ -37,6 +37,12 @@ class Level(object):
         self.map_y = 0
         self.end_point = None
 
+        self.left_boundary = None
+        self.right_boundary = None
+        self.bottom_boundary = None
+        self.top_boundary = None
+
+
     def update(self, dt):
         self.platform_list.update(dt)
         self.enemy_list.update(dt)
@@ -84,37 +90,47 @@ class Level(object):
                 effect.x_pos += shift_x
                 effect.rect.x = effect.x_pos
 
+            self.left_boundary.x += shift_x
+            self.right_boundary.x += shift_x
+            self.bottom_boundary.x += shift_x
+            self.top_boundary.x += shift_x
+
     def shift_world_y(self, shift_y):
         """
         Offset all objects handled by the level class according to the viewport
         """
 
-        if self.world_shift_x + shift_y > 0:
-            pass
-        else:
-            shift_y = round(shift_y)
-            self.world_shift_y += shift_y
+        #if self.world_shift_y + shift_y > 0:
+        #    pass
 
-            for blocker in self.blockers:
-                blocker.y += shift_y
-            self.map_y += shift_y
-            self.end_point.y += shift_y
+        shift_y = round(shift_y)
+        self.world_shift_y += shift_y
 
-            for movingplatform in self.platform_list:
-                movingplatform.y_pos += shift_y
-                movingplatform.rect.y = movingplatform.y_pos
+        for blocker in self.blockers:
+            blocker.y += shift_y
+        self.map_y += shift_y
+        self.end_point.y += shift_y
 
-            for enemy in self.enemy_list:
-                enemy.y_pos += shift_y
-                enemy.rect.y = enemy.y_pos
+        for movingplatform in self.platform_list:
+            movingplatform.y_pos += shift_y
+            movingplatform.rect.y = movingplatform.y_pos
 
-            for item in self.item_list:
-                item.y_pos += shift_y
-                item.rect.y = item.y_pos
+        for enemy in self.enemy_list:
+            enemy.y_pos += shift_y
+            enemy.rect.y = enemy.y_pos
 
-            for effect in self.effect_list:
-                effect.y_pos += shift_y
-                effect.rect.y = effect.y_pos
+        for item in self.item_list:
+            item.y_pos += shift_y
+            item.rect.y = item.y_pos
+
+        for effect in self.effect_list:
+            effect.y_pos += shift_y
+            effect.rect.y = effect.y_pos
+
+        self.left_boundary.y += shift_y
+        self.right_boundary.y += shift_y
+        self.bottom_boundary.y += shift_y
+        self.top_boundary.y += shift_y
 
     def create_enemy(self, x, y):
         """
@@ -179,6 +195,10 @@ class Level_01(Level):
 
         self.blockers = []
         self.end_point = []
+        self.left_boundary = None
+        self.right_boundary = None
+        self.bottom_boundary = None
+        self.top_boundary = None
 
         for tile_object in self.tile_renderer.tmx_data.objects:
             properties = tile_object.__dict__
@@ -212,6 +232,36 @@ class Level_01(Level):
                 height = properties['height']
                 new_rect = pygame.Rect(x, y, width, height)
                 self.end_point = new_rect
+            if properties["name"] == "lowb":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.bottom_boundary = new_rect
+            if properties["name"] == "leftb":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.left_boundary = new_rect
+            if properties["name"] == "rightb":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.right_boundary = new_rect
+            if properties["name"] == "upb":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.top_boundary = new_rect
+
+
 
 
         # List of moving platforms
@@ -288,3 +338,31 @@ class Level_02(Level):
                 height = properties['height']
                 new_rect = pygame.Rect(x, y, width, height)
                 self.end_point = new_rect
+            if properties["name"] == "lowb":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.bottom_boundary = new_rect
+            if properties["name"] == "leftb":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.left_boundary = new_rect
+            if properties["name"] == "rightb":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.right_boundary = new_rect
+            if properties["name"] == "upb":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.top_boundary = new_rect
