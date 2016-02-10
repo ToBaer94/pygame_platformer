@@ -1,6 +1,15 @@
 # pygame_platformer
 
-Simple game to teach myself programming. Requires python 2.7 and pygame 1.9.
+Simple game to teach myself programming. Requires python 2.7 and pygame 1.9. 
+
+Uses pytmx version 3.20 to allow loading of .tmx map files. pytmx is licensed under LGPL v3:  https://github.com/bitcraft/PyTMX
+
+To update the pytmx library, download the newest build from https://github.com/bitcraft/PyTMX and replace the pytmx folder
+with the pytmx folder from bitcraft's repository.
+ 
+Updating pytmx possibly requires you to modifiy the tilerenderer.py file.
+
+
 
 Arrow keys for directional movement and jumping, space to throw fireballs.
 
