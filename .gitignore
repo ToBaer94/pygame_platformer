@@ -4,3 +4,6 @@
 
 #Pycharm
 .idea/
+
+#tiled
+*.tsx
