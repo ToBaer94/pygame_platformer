@@ -21,6 +21,8 @@ class GameEngine(object):
         self.level_list = [] # Set up the list of levels
         level = levels.Level_01(self.player)
         self.level_list.append(level)
+        level = levels.Level_02(self.player)
+        self.level_list.append(level)
 
         self.current_level_no = 0
         self.current_level = self.level_list[self.current_level_no]
@@ -44,7 +46,7 @@ class GameEngine(object):
             if self.game_over:
                 self.started = 0
                 self.game_over_reset()
-            if self.started > 2:
+            if self.started > 5:
                 self.handle_events()
                 self.update_everything(frame_time)
             self.draw_everything()
@@ -98,30 +100,51 @@ class GameEngine(object):
             self.active_sprite_list.update(delta_time) # Player update
             total_delta_time -= delta_time
 
-        self.move_camera()
+        self.move_camera_x()
+        self.move_camera_y()
 
         if self.player.rect.colliderect(self.current_level.end_point):
             self.switch_level()
 
-        if self.player.rect.top > SCREEN_HEIGHT or self.player.dead:
+        if self.player.rect.top > SCREEN_HEIGHT and self.current_level.world_shift_y <= -70 or self.player.dead:
             print "Game over"
             self.game_over = True
 
-    def move_camera(self):
+    def move_camera_x(self):
         if self.player.pos.x >= 500:
             diff = self.player.pos.x - 500.0
             self.player.pos.x = 500
             self.player.rect.x = self.player.pos.x
-            self.current_level.shift_world(-diff)
+            self.current_level.shift_world_x(-diff)
 
         if self.player.pos.x <= 120:
             diff = 120 - self.player.pos.x
-            if self.player.level.world_shift >= -7:
+            if self.player.level.world_shift_x >= -7:
                 pass
             else:
                 self.player.pos.x = 120
                 self.player.rect.x = self.player.pos.x
-            self.current_level.shift_world(diff)
+            self.current_level.shift_world_x(diff)
+
+    def move_camera_y(self):
+        print self.player.pos
+        if self.player.pos.y > 380.0:
+            diff = self.player.pos.y - 380.0
+            if self.current_level.world_shift_y <= -150:
+                pass
+            else:
+                self.player.pos.y = 380.0
+                self.player.rect.y = self.player.pos.y
+                self.current_level.shift_world_y(-diff)
+
+        if self.player.pos.y <= 120:
+            diff = 120 - self.player.pos.y
+            if self.player.level.world_shift_y >= 100:
+                pass
+            else:
+                self.player.pos.y += diff
+                self.player.rect.y = self.player.pos.y
+                self.current_level.shift_world_y(diff)
 
     def switch_level(self):
         if self.current_level_no < len(self.level_list)-1:
@@ -131,8 +154,10 @@ class GameEngine(object):
             self.player.set_position()
         else:
             # If last level, rest viewport and player position to level start
-            self.current_level.shift_world((-self.current_level.world_shift))
-            self.current_level.world_shift = 0
+            self.current_level.shift_world_x((-self.current_level.world_shift_x))
+            self.current_level.shift_world_y((-self.current_level.world_shift_y))
+            self.current_level.world_shift_x = 0
+            self.current_level.world_shift_y = 0
             self.player.set_position()
             print "reached the end of the last level"
 
@@ -151,6 +176,8 @@ class GameEngine(object):
 
         self.level_list = [] # Set up the list of levels
         level = levels.Level_01(self.player)
+        self.level_list.append(level)
+        level = levels.Level_02(self.player)
         self.level_list.append(level)
 
         self.current_level_no = 0

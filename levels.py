@@ -27,7 +27,9 @@ class Level(object):
 
         self.blockers = None
 
-        self.world_shift = 0
+        self.world_shift_x = 0
+        self.world_shift_y = 0
+
 
         self.background = None
 
@@ -50,16 +52,16 @@ class Level(object):
         for enemy in self.enemy_list:
             pygame.draw.rect(screen, constants.BLACK, [enemy.x_pos, enemy.y_pos, enemy.rect.width, enemy.rect.height], 1)
 
-    def shift_world(self, shift_x):
+    def shift_world_x(self, shift_x):
         """
         Offset all objects handled by the level class according to the viewport
         """
 
-        if self.world_shift + shift_x > 0:
+        if self.world_shift_x + shift_x > 0:
             pass
         else:
             shift_x = round(shift_x)
-            self.world_shift += shift_x
+            self.world_shift_x += shift_x
 
             for blocker in self.blockers:
                 blocker.x += shift_x
@@ -81,6 +83,38 @@ class Level(object):
             for effect in self.effect_list:
                 effect.x_pos += shift_x
                 effect.rect.x = effect.x_pos
+
+    def shift_world_y(self, shift_y):
+        """
+        Offset all objects handled by the level class according to the viewport
+        """
+
+        if self.world_shift_x + shift_y > 0:
+            pass
+        else:
+            shift_y = round(shift_y)
+            self.world_shift_y += shift_y
+
+            for blocker in self.blockers:
+                blocker.y += shift_y
+            self.map_y += shift_y
+            self.end_point.y += shift_y
+
+            for movingplatform in self.platform_list:
+                movingplatform.y_pos += shift_y
+                movingplatform.rect.y = movingplatform.y_pos
+
+            for enemy in self.enemy_list:
+                enemy.y_pos += shift_y
+                enemy.rect.y = enemy.y_pos
+
+            for item in self.item_list:
+                item.y_pos += shift_y
+                item.rect.y = item.y_pos
+
+            for effect in self.effect_list:
+                effect.y_pos += shift_y
+                effect.rect.y = effect.y_pos
 
     def create_enemy(self, x, y):
         """
@@ -202,3 +236,55 @@ class Level_01(Level):
         self.create_special_block(level_special, player) # Create item blocks
         """
 
+class Level_02(Level):
+    """
+    Class creating the first level
+    """
+    def __init__(self, player):
+
+        Level.__init__(self, player)
+
+
+
+        self.tmx_file = "map2.tmx"
+        self.tile_renderer = tilerenderer.Renderer(self.tmx_file)
+        self.map_surface = self.tile_renderer.make_map()
+        self.map_rect = self.map_surface.get_rect()
+
+        self.player = player
+
+        self.blockers = []
+        self.end_point = []
+
+        for tile_object in self.tile_renderer.tmx_data.objects:
+            properties = tile_object.__dict__
+            if properties["name"] == "blocker":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.blockers.append(new_rect)
+            if properties["name"] == "enemy":
+                x = properties['x']
+                y = properties['y']
+                self.create_enemy(x, y)
+            if properties["name"] == "enemy2":
+                x = properties['x']
+                y = properties['y']
+                # self.create_koopa(x, y)
+            if properties["name"] == "movingplat":
+                x = properties['x']
+                y = properties['y']
+                self.create_moving_platform([x, y, x-140, x+140, 0, 0, 1, 0], self.player)
+            if properties["name"] == "itemblock":
+                x = properties['x']
+                y = properties['y']
+                self.create_special_block((x, y), self.player)
+            if properties["name"] == "end":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.end_point = new_rect

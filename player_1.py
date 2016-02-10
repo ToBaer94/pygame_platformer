@@ -264,7 +264,7 @@ class Player(pygame.sprite.Sprite):
     def walk_animation(self):
         # If the player is moving, play the correct movement animation
         if self.vel.x != 0:
-            pos = self.rect.x + self.level.world_shift
+            pos = self.rect.x + self.level.world_shift_x
             if self.direction == "Right":
                 frame = (pos // 20) % len(self.walking_frames_r)
                 frame = int(frame)
@@ -298,7 +298,7 @@ class Player(pygame.sprite.Sprite):
         If on the ground, sets y-velocity.
         """
         if self.jumping == False:
-            self.vel.y = -10
+            self.vel.y = -11
             self.jumping = True
 
     def go_left(self):

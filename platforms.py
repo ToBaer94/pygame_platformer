@@ -116,14 +116,14 @@ class MovingPlatform(Platform):
                 self.change_y *= -1
 
         if self.change_x != 0:
-            cur_x_pos = self.x_pos - self.level.world_shift
+            cur_x_pos = self.x_pos - self.level.world_shift_x
             if cur_x_pos < self.boundary_left:
                 self.change_x *= -1
-                self.x_pos = self.boundary_left + 1 + self.level.world_shift
+                self.x_pos = self.boundary_left + 1 + self.level.world_shift_x
 
             if cur_x_pos > self.boundary_right:
                 self.change_x *= -1
-                self.x_pos = self.boundary_right - 1 + self.level.world_shift
+                self.x_pos = self.boundary_right - 1 + self.level.world_shift_x
 
     def collide(self):
         pass
