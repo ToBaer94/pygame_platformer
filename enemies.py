@@ -96,13 +96,13 @@ class Enemy(pygame.sprite.Sprite):
             self.change_y += 0.35 * dt
 
 
-class Koopa(Enemy):
+class EdgeWalker(Enemy):
     """
     More advanced enemy. Turns around at ledges of platforms and uses
     sprite animation.
     """
     def __init__(self, x, y, level):
-        super(Koopa, self).__init__(x, y, level)
+        super(EdgeWalker, self).__init__(x, y, level)
 
         self.image = pygame.image.load(path.join(img_dir, "worm", "frame-1.png")).convert_alpha()
         self.image =pygame.transform.scale(self.image, (72, 76))

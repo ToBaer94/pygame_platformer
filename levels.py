@@ -140,12 +140,12 @@ class Level(object):
         enemy = enemies.Enemy(x, y, self)
         self.enemy_list.add(enemy)
 
-    def create_koopa(self, x, y):
+    def create_edgewalker(self, x, y):
         """
         Creates a Koopa enemy instance at the parameter pixel location, gives the enemy instance a reference to
         all platforms. Adds the enemy to the Sprite list used for updating and drawing
         """
-        enemy = enemies.Koopa(x, y, self)
+        enemy = enemies.EdgeWalker(x, y, self)
         self.enemy_list.add(enemy)
 
     def create_moving_platform(self, platform, player):  ##create_moving_platform([0, 0, 100, 25], player)
@@ -216,7 +216,7 @@ class Level_01(Level):
             if properties["name"] == "enemy2":
                 x = properties['x']
                 y = properties['y']
-                self.create_koopa(x, y)
+                self.create_edgewalker(x, y)
             if properties["name"] == "movingplat":
                 x = properties['x']
                 y = properties['y']
