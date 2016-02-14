@@ -18,27 +18,19 @@ class Player(pygame.sprite.Sprite):
         super(Player, self).__init__()
 
         self.sprite_sheet = SpriteSheet(path.join(img_dir, "p1_spritesheet.png"))
-        self.stand_sprite_r = pygame.transform.scale(self.sprite_sheet.get_image(67, 196, 66, 92), (40, 56))
+        self.stand_sprite_r = self.sprite_sheet.get_image(67, 196, 66, 92)
         self.stand_sprite_l = pygame.transform.flip(self.stand_sprite_r, True, False)
         self.walking_frames_l = []
         self.walking_frames_r = []
         self.jumping = False
-        self.jumping_sprite_r = pygame.transform.scale(self.sprite_sheet.get_image(438, 93, 67, 94), (40, 56))
+        self.jumping_sprite_r = self.sprite_sheet.get_image(438, 93, 67, 94)
         self.jumping_sprite_l = pygame.transform.flip(self.jumping_sprite_r, True, False)
 
         self.set_walking_animation()
 
-        self.image = self.walking_frames_r[0]
+        self.image = self.stand_sprite_r
 
         self.rect = self.image.get_rect()
-
-        self.rect.x = 120
-        self.rect.y = 580 - self.rect.height
-
-        self.pos = vector(120, 580 - self.rect.height)
-
-        self.vel = vector(0, 0)
-        self.acc = vector(0, 0)
 
         self.status = "Small" # Power up status
 
@@ -46,84 +38,103 @@ class Player(pygame.sprite.Sprite):
 
         self.level = None
 
+
+        self.pos = vector(0, 0)
+
+        self.vel = vector(0, 0)
+        self.acc = vector(0, 0)
+
         self.dead = False
+
+    def set_position(self):
+        self.tile_renderer = self.level.tile_renderer
+
+        for tile_object in self.tile_renderer.tmx_data.objects:
+            properties = tile_object.__dict__
+            if properties["name"] == "Start":
+                self.pos.x = properties['x']
+                self.pos.y = properties['y']
+                print self.pos.x, self.pos.y
+
+        self.rect.x = self.pos.x
+        self.rect.y = self.pos.y
 
     def set_walking_animation(self):
         """
         Called to initiate the walking animations in both directions
         """
         image = self.sprite_sheet.get_image(0, 0, 72, 97)
-        image = pygame.transform.scale(image, (40, 56))
+
         self.walking_frames_r.append(image)
 
         image = pygame.transform.flip(image, True, False)
         self.walking_frames_l.append(image)
 
         image = self.sprite_sheet.get_image(73, 0, 72, 97)
-        image = pygame.transform.scale(image, (40, 56))
+
         self.walking_frames_r.append(image)
 
         image = pygame.transform.flip(image, True, False)
         self.walking_frames_l.append(image)
 
         image = self.sprite_sheet.get_image(146, 0, 72, 97)
-        image = pygame.transform.scale(image, (40, 56))
+
         self.walking_frames_r.append(image)
 
         image = pygame.transform.flip(image, True, False)
         self.walking_frames_l.append(image)
 
         image = self.sprite_sheet.get_image(0, 98, 72, 97)
-        image = pygame.transform.scale(image, (40, 56))
+
         self.walking_frames_r.append(image)
 
         image = pygame.transform.flip(image, True, False)
         self.walking_frames_l.append(image)
 
         image = self.sprite_sheet.get_image(73, 98, 72, 97)
-        image = pygame.transform.scale(image, (40, 56))
+
         self.walking_frames_r.append(image)
 
         image = pygame.transform.flip(image, True, False)
         self.walking_frames_l.append(image)
 
         image = self.sprite_sheet.get_image(146, 98, 72, 97)
-        image = pygame.transform.scale(image, (40, 56))
+
         self.walking_frames_r.append(image)
 
         image = pygame.transform.flip(image, True, False)
         self.walking_frames_l.append(image)
 
         image = self.sprite_sheet.get_image(219, 0, 72, 97)
-        image = pygame.transform.scale(image, (40, 56))
+
         self.walking_frames_r.append(image)
 
         image = pygame.transform.flip(image, True, False)
         self.walking_frames_l.append(image)
 
         image = self.sprite_sheet.get_image(292, 0, 72, 97)
-        image = pygame.transform.scale(image, (40, 56))
+
         self.walking_frames_r.append(image)
 
         image = pygame.transform.flip(image, True, False)
         self.walking_frames_l.append(image)
 
         image = self.sprite_sheet.get_image(219, 98, 72, 97)
-        image = pygame.transform.scale(image, (40, 56))
+
         self.walking_frames_r.append(image)
 
         image = pygame.transform.flip(image, True, False)
         self.walking_frames_l.append(image)
 
         image = self.sprite_sheet.get_image(365, 0, 72, 97)
-        image = pygame.transform.scale(image, (40, 56))
+
         self.walking_frames_r.append(image)
 
         image = pygame.transform.flip(image, True, False)
         self.walking_frames_l.append(image)
 
         image = self.sprite_sheet.get_image(292, 98, 72, 97)
-        image = pygame.transform.scale(image, (40, 56))
+
         self.walking_frames_r.append(image)
 
         image = pygame.transform.flip(image, True, False)
@@ -153,37 +164,9 @@ class Player(pygame.sprite.Sprite):
         self.pos.x += self.vel.x * dt
         self.rect.x = self.pos.x
 
-        # If the player is moving, play the correct movement animation
-        if self.vel.x != 0:
-            pos = self.rect.x + self.level.world_shift
-            if self.direction == "Right":
-                frame = (pos // 20) % len(self.walking_frames_r)
-                frame = int(frame)
-                self.image = self.walking_frames_r[frame]
-            else:
-                frame = (pos // 20) % len(self.walking_frames_l)
-                frame = int(frame)
-                self.image = self.walking_frames_l[frame]
+        self.walk_animation()
 
-        # Else display the idle sprite
-        else:
-            if self.direction == "Right":
-                self.image = self.stand_sprite_r
-            else:
-                self.image = self.stand_sprite_l
-
-        # Handle platform collisions after x-axis movement
-        block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
-        for block in block_hit_list:
-
-            if self.vel.x > 0:
-                self.rect.right = block.rect.left
-                self.pos.x = self.rect.x
-                self.vel.x = 0
-            elif self.vel.x < 0:
-                self.rect.left = block.rect.right
-                self.pos.x = self.rect.x
-                self.vel.x = 0
+        self.world_x_collision()
 
         # Handle item pick up collisions
         item_hit_list = pygame.sprite.spritecollide(self, self.level.item_list, True)
@@ -202,32 +185,64 @@ class Player(pygame.sprite.Sprite):
 
         self.enemy_collide()
 
-        # Handle platform collision after y-axis movement
-        block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
-        if block_hit_list:
-            self.jumping = False
-        else:
-            # If the player is not touching a platform after y-axis movement, set jumping sprite
-            self.rect.y += 2
-            platform_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
-            self.rect.y -= 2
-            if not platform_hit_list:
-                if self.direction == "Right":
-                    self.image = self.jumping_sprite_r
-                else:
-                    self.image = self.jumping_sprite_l
+        if self.jumping:
+            if self.direction == "Right":
+                self.image = self.jumping_sprite_r
+            else:
+                self.image = self.jumping_sprite_l
 
-        for block in block_hit_list:
-            if self.vel.y > 0:
-                self.rect.bottom = block.rect.top
-                self.pos.y = self.rect.y
+        self.world_y_collision()
 
-            elif self.vel.y < 0:
-                self.rect.top = block.rect.bottom
-                self.pos.y = self.rect.y
-            self.vel.y = 0
+    def world_x_collision(self):
+        for block in self.level.blockers:
+            if self.rect.colliderect(block):
 
-            block.collide(dt) # Call collide method for specific platforms (item block, moving platform)
+                if self.vel.x > 0:
+                    self.rect.right = block.left
+                    self.pos.x = self.rect.x
+                    self.vel.x = 0
+                elif self.vel.x < 0:
+                    self.rect.left = block.right
+                    self.pos.x = self.rect.x
+                    self.vel.x = 0
+        for block in self.level.platform_list:
+            if self.rect.colliderect(block):
+                if self.vel.x > 0:
+                    self.rect.right = block.rect.left
+                    self.pos.x = self.rect.x
+                    self.vel.x = 0
+                elif self.vel.x < 0:
+                    self.rect.left = block.rect.right
+                    self.pos.x = self.rect.x
+                    self.vel.x = 0
+
+    def world_y_collision(self):
+        for block in self.level.blockers:
+            if self.rect.colliderect(block):
+                if self.vel.y > 0:
+                    self.rect.bottom = block.top
+                    self.pos.y = self.rect.y
+                    self.jumping = False
+
+                elif self.vel.y < 0:
+                    self.rect.top = block.bottom
+                    self.pos.y = self.rect.y
+
+                self.vel.y = 0
+
+        for block in self.level.platform_list:
+            if self.rect.colliderect(block):
+                self.jumping = False
+                if self.vel.y > 0:
+                    self.rect.bottom = block.rect.top
+                    self.pos.y = self.rect.y
+
+                elif self.vel.y < 0:
+                    self.rect.top = block.rect.bottom
+                    self.pos.y = self.rect.y
+
+                self.vel.y = 0
+                block.collide()
 
     def enemy_collide(self):
         enemy_hit_list = pygame.sprite.spritecollide(self, self.level.enemy_list, True)
@@ -247,6 +262,26 @@ class Player(pygame.sprite.Sprite):
                     print "You're dead"
                     self.dead = True
 
+    def walk_animation(self):
+        # If the player is moving, play the correct movement animation
+        if self.vel.x != 0:
+            pos = self.rect.x + self.level.world_shift_x
+            if self.direction == "Right":
+                frame = (pos // 20) % len(self.walking_frames_r)
+                frame = int(frame)
+                self.image = self.walking_frames_r[frame]
+            else:
+                frame = (pos // 20) % len(self.walking_frames_l)
+                frame = int(frame)
+                self.image = self.walking_frames_l[frame]
+
+        # Else display the idle sprite
+        else:
+            if self.direction == "Right":
+                self.image = self.stand_sprite_r
+            else:
+                self.image = self.stand_sprite_l
+
     def calc_grav(self, dt):
         """
         Handles gravity
@@ -263,12 +298,8 @@ class Player(pygame.sprite.Sprite):
         Moves the player down 2 pixels to check if he is on the ground, then sets him back up 2 pixels.
         If on the ground, sets y-velocity.
         """
-        self.rect.y += 2
-        platform_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
-        self.rect.y -= 2
-
-        if len(platform_hit_list) > 0:
-            self.vel.y = -10
+        if self.jumping == False:
+            self.vel.y = -11
             self.jumping = True
 
     def go_left(self):
@@ -292,11 +323,11 @@ class Player(pygame.sprite.Sprite):
             self.status = "Fire"
 
             self.sprite_sheet = SpriteSheet(path.join(img_dir,"p3_spritesheet.png"))
-            self.stand_sprite_r = pygame.transform.scale(self.sprite_sheet.get_image(67, 196, 66, 92), (40, 56))
+            self.stand_sprite_r = self.sprite_sheet.get_image(67, 196, 66, 92)
             self.stand_sprite_l = pygame.transform.flip(self.stand_sprite_r, True, False)
             self.walking_frames_l = []
             self.walking_frames_r = []
-            self.jumping_sprite_r = pygame.transform.scale(self.sprite_sheet.get_image(438, 93, 67, 94), (40, 56))
+            self.jumping_sprite_r = self.sprite_sheet.get_image(438, 93, 67, 94)
             self.jumping_sprite_l = pygame.transform.flip(self.jumping_sprite_r, True, False)
             self.set_walking_animation()
             self.image = self.walking_frames_r[0]
@@ -307,11 +338,11 @@ class Player(pygame.sprite.Sprite):
             self.status = "Small"
 
             self.sprite_sheet = SpriteSheet(path.join(img_dir,"p1_spritesheet.png"))
-            self.stand_sprite_r = pygame.transform.scale(self.sprite_sheet.get_image(67, 196, 66, 92), (40, 56))
+            self.stand_sprite_r = self.sprite_sheet.get_image(67, 196, 66, 92)
             self.stand_sprite_l = pygame.transform.flip(self.stand_sprite_r, True, False)
             self.walking_frames_l = []
             self.walking_frames_r = []
-            self.jumping_sprite_r = pygame.transform.scale(self.sprite_sheet.get_image(438, 93, 67, 94), (40, 56))
+            self.jumping_sprite_r = self.sprite_sheet.get_image(438, 93, 67, 94)
             self.jumping_sprite_l = pygame.transform.flip(self.jumping_sprite_r, True, False)
             self.set_walking_animation()
             self.image = self.walking_frames_r[0]
