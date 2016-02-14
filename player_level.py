@@ -1,6 +1,4 @@
 import pygame
-import constants
-from platforms import MovingPlatform, SpecialBlock
 from spritesheet_functions import SpriteSheet
 from os import path
 import powerup
@@ -259,8 +257,8 @@ class Player(pygame.sprite.Sprite):
                     print self.status
 
                 else:
-                    print "You're dead"
                     self.dead = True
+
 
     def walk_animation(self):
         # If the player is moving, play the correct movement animation

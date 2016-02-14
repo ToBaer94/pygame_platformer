@@ -12,11 +12,17 @@ Updating pytmx possibly requires you to modifiy the tilerenderer.py file.
 pytmx additionally uses the "six"-module by "gutworth". "six" is licensed under MIT: https://bitbucket.org/gutworth/six
 
 
+Controls:
+
+Overworld - Arrow keys for movement, space to enter a level. You need to beat the previous level to access the next one. Currently 3 levels implemented.
+
+Level - Arrow keys for directional movement and jumping, space to throw fireballs after picking up a mushroom.
 
 
-Arrow keys for directional movement and jumping, space to throw fireballs.
 
 Credit for most of the art goes to Kenney: http://opengameart.org/content/platformer-art-deluxe
+
+Credit for the overworld art goes to Buch: http://opengameart.org/content/the-field-of-the-floating-islands
 
 Credit for the Land Monster and the Worm-type Enemy goes to bevouliin: http://opengameart.org/content/bevouliin-free-sprite-sheets-underground-worm-monster
 http://opengameart.org/content/bevouliin-free-sprite-sheets-monster-game-asset

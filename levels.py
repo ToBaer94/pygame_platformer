@@ -3,7 +3,7 @@ import constants
 import platforms
 import enemies
 import tilerenderer
-from player_1 import Player
+from player_level import Player
 from os import path
 
 img_dir = path.join(path.dirname(__file__), "world")
@@ -327,6 +327,85 @@ class Level_02(Level):
                 x = properties['x']
                 y = properties['y']
                 self.create_moving_platform([x, y, x-140, x+140, 0, 0, 1, 0], self.player)
+            if properties["name"] == "itemblock":
+                x = properties['x']
+                y = properties['y']
+                self.create_special_block((x, y), self.player)
+            if properties["name"] == "end":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.end_point = new_rect
+            if properties["name"] == "lowb":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.bottom_boundary = new_rect
+            if properties["name"] == "leftb":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.left_boundary = new_rect
+            if properties["name"] == "rightb":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.right_boundary = new_rect
+            if properties["name"] == "upb":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.top_boundary = new_rect
+
+class Level_03(Level):
+    """
+    Class creating the first level
+    """
+    def __init__(self, player):
+
+        Level.__init__(self, player)
+
+        self.tmx_file = "map3.tmx"
+        self.tile_renderer = tilerenderer.Renderer(self.tmx_file)
+        self.map_surface = self.tile_renderer.make_map()
+        self.map_rect = self.map_surface.get_rect()
+
+        self.player = player
+
+        self.blockers = []
+        self.end_point = []
+
+        for tile_object in self.tile_renderer.tmx_data.objects:
+            properties = tile_object.__dict__
+            if properties["name"] == "blocker":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.blockers.append(new_rect)
+            if properties["name"] == "enemy":
+                x = properties['x']
+                y = properties['y']
+                self.create_enemy(x, y)
+            if properties["name"] == "enemy2":
+                x = properties['x']
+                y = properties['y']
+                self.create_edgewalker(x, y)
+            if properties["name"] == "movingplat":
+                x = properties['x']
+                y = properties['y']
+                self.create_moving_platform([x, y, x-50, x+50, 0, 0, 1, 0], self.player)
             if properties["name"] == "itemblock":
                 x = properties['x']
                 y = properties['y']
