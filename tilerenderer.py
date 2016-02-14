@@ -1,5 +1,5 @@
 import pygame
-import pytmx
+import pytmx.pytmx
 import pytmx.util_pygame
 
 class Renderer(object):
