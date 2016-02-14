@@ -9,6 +9,9 @@ with the pytmx folder from bitcraft's repository.
  
 Updating pytmx possibly requires you to modifiy the tilerenderer.py file.
 
+It also uses the "six"-module by "gutworth". "six" is licensed under MIT: https://bitbucket.org/gutworth/six
+
+
 
 
 Arrow keys for directional movement and jumping, space to throw fireballs.
