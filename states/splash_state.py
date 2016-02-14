@@ -3,6 +3,7 @@ import pygame as pg
 
 
 class SplashScreen(GameState):
+    """ State class representing the opening screen. Sets the next state to map_state when pressing space """
     def __init__(self):
         super(SplashScreen, self).__init__()
         self.title = self.font.render("Platform Jumper", True, pg.Color("yellow"))

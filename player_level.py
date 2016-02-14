@@ -215,6 +215,7 @@ class Player(pygame.sprite.Sprite):
                     self.vel.x = 0
 
     def world_y_collision(self):
+        self.jumping = True
         for block in self.level.blockers:
             if self.rect.colliderect(block):
                 if self.vel.y > 0:

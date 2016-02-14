@@ -2,6 +2,7 @@ import pygame as pg
 
 
 class Player(pg.sprite.Sprite):
+    """ Player class for the overworld character used to select a level """
     def __init__(self, start, paths, levels):
         super(Player, self).__init__()
 
@@ -10,12 +11,20 @@ class Player(pg.sprite.Sprite):
         self.rect.x = start.x
         self.rect.y = start.y
 
+        # Predictor is a rect used to check for a collision X pixel in a direction
+        # Checks for collision with self.paths. If a collision happens the player can move
         self.predictor = self.rect.copy()
 
+        # Rects for the paths and levels to allow or stop movement
         self.paths = paths
         self.levels = levels
 
+        # Flag to prevent movement while moving
         self.moving = False
+
+        # Pressing an arrow key causes map_state.py to change this attribute
+        # The predictor rect moves X pixels in self.direction
+        # and checks for a collision with path
         self.direction = None
 
     def update(self):
@@ -23,6 +32,7 @@ class Player(pg.sprite.Sprite):
         self.move()
 
     def check_valid_move(self):
+        """ Check if the player is allowed to move in a direction """
         if self.moving == False:
             if self.direction == "right":
                 self.predictor.x += 33
