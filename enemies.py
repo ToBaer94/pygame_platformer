@@ -3,7 +3,7 @@ import constants
 import platforms
 
 from os import path
-img_dir = path.join(path.dirname(__file__), "enemy")
+img_dir = path.join(path.dirname(__file__), "assets", "sprites", "enemy")
 
 
 class Enemy(pygame.sprite.Sprite):

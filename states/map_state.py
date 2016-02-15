@@ -10,7 +10,7 @@ class Map(GameState):
         super(Map, self).__init__()
         import overworld_player as playerobject
 
-        self.tmx_file = "overworld.tmx"
+        self.tmx_file = "assets\levels\overworld.tmx"
         self.tile_renderer = tilerenderer.Renderer(self.tmx_file)
         self.map_surface = self.tile_renderer.make_map()
         self.map_rect = self.map_surface.get_rect()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" renderorder="right-down" width="51" height="38" tilewidth="16" tileheight="16" nextobjectid="43">
  <tileset firstgid="1" name="tiles" tilewidth="16" tileheight="16" tilecount="663" columns="51">
-  <image source="tiles.png" width="816" height="208"/>
+  <image source="../map_tiles/world/tiles.png" width="816" height="208"/>
  </tileset>
  <layer name="Kachelebene 1" width="51" height="38">
   <data encoding="csv">

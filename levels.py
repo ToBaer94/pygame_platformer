@@ -7,25 +7,30 @@ from player_level import Player
 from os import path
 
 img_dir = path.join(path.dirname(__file__), "world")
+level_dir = path.join(path.dirname(__file__), "assets", "levels")
 
 
 class Level(object):
     """
     Level class. Handles updating and drawing of the objects in the current level as well as moving the viewport.
-    Only used as base class.
     Holds methods for spawning enemies, platforms and item blocks.
     """
-    def __init__(self, player):
+    def __init__(self, player, level):
+        super(Level, self).__init__()
+
         self.platform_list = pygame.sprite.Group()
         self.enemy_list = pygame.sprite.Group()
         self.item_list = pygame.sprite.Group()
         self.effect_list = pygame.sprite.Group()
-        self.player = None
 
-        self.map_surface = None
-        self.map_rect = None
+        self.tmx_file = path.join(level_dir, level + ".tmx")
+        self.tile_renderer = tilerenderer.Renderer(self.tmx_file)
+        self.map_surface = self.tile_renderer.make_map()
+        self.map_rect = self.map_surface.get_rect()
 
-        self.blockers = None
+        self.player = player
+        self.blockers = []
+        self.end_point = []
 
         self.world_shift_x = 0
         self.world_shift_y = 0
@@ -42,6 +47,7 @@ class Level(object):
         self.bottom_boundary = None
         self.top_boundary = None
 
+        self.setup_level()
 
     def update(self, dt):
         self.platform_list.update(dt)
@@ -60,6 +66,7 @@ class Level(object):
         for enemy in self.enemy_list:
             pygame.draw.rect(screen, constants.BLACK, [enemy.x_pos, enemy.y_pos, enemy.rect.width, enemy.rect.height], 1)
         """
+
     def shift_world_x(self, shift_x):
         """
         Offset all objects handled by the level class according to the viewport
@@ -143,7 +150,7 @@ class Level(object):
 
     def create_edgewalker(self, x, y):
         """
-        Creates a Koopa enemy instance at the parameter pixel location, gives the enemy instance a reference to
+        Creates an Edgewalker enemy instance at the parameter pixel location, gives the enemy instance a reference to
         all platforms. Adds the enemy to the Sprite list used for updating and drawing
         """
         enemy = enemies.EdgeWalker(x, y, self)
@@ -241,68 +248,68 @@ class Level(object):
                 self.top_boundary = new_rect
 
 
-class Level_01(Level):
-    """
-    Class creating the first level
-    """
-    def __init__(self, player):
-
-        Level.__init__(self, player)
-
-        self.tmx_file = "map.tmx"
-        self.tile_renderer = tilerenderer.Renderer(self.tmx_file)
-        self.map_surface = self.tile_renderer.make_map()
-        self.map_rect = self.map_surface.get_rect()
-
-        self.player = player
-
-        self.blockers = []
-        self.end_point = []
-        self.left_boundary = None
-        self.right_boundary = None
-        self.bottom_boundary = None
-        self.top_boundary = None
-
-        self.setup_level()
-
-class Level_02(Level):
-    """
-    Class creating the first level
-    """
-    def __init__(self, player):
-
-        Level.__init__(self, player)
-
-
-
-        self.tmx_file = "map2.tmx"
-        self.tile_renderer = tilerenderer.Renderer(self.tmx_file)
-        self.map_surface = self.tile_renderer.make_map()
-        self.map_rect = self.map_surface.get_rect()
-
-        self.player = player
-
-        self.blockers = []
-        self.end_point = []
-
-        self.setup_level()
-
-class Level_03(Level):
-    """
-    Class creating the first level
-    """
-    def __init__(self, player):
-
-        Level.__init__(self, player)
-
-        self.tmx_file = "map3.tmx"
-        self.tile_renderer = tilerenderer.Renderer(self.tmx_file)
-        self.map_surface = self.tile_renderer.make_map()
-        self.map_rect = self.map_surface.get_rect()
-
-        self.player = player
-
-        self.blockers = []
-        self.end_point = []
-
-        self.setup_level()
+# class Level_01(Level):
+#     """
+#     Class creating the first level
+#     """
+#     def __init__(self, player):
+#
+#         Level.__init__(self, player)
+#
+#         self.tmx_file = path.join(level_dir, "map.tmx")
+#         self.tile_renderer = tilerenderer.Renderer(self.tmx_file)
+#         self.map_surface = self.tile_renderer.make_map()
+#         self.map_rect = self.map_surface.get_rect()
+#
+#         self.player = player
+#
+#         self.blockers = []
+#         self.end_point = []
+#         self.left_boundary = None
+#         self.right_boundary = None
+#         self.bottom_boundary = None
+#         self.top_boundary = None
+#
+#         self.setup_level()
+#
+# class Level_02(Level):
+#     """
+#     Class creating the first level
+#     """
+#     def __init__(self, player):
+#
+#         Level.__init__(self, player)
+#
+#
+#
+#         self.tmx_file = path.join(level_dir, "map2.tmx")
+#         self.tile_renderer = tilerenderer.Renderer(self.tmx_file)
+#         self.map_surface = self.tile_renderer.make_map()
+#         self.map_rect = self.map_surface.get_rect()
+#
+#         self.player = player
+#
+#         self.blockers = []
+#         self.end_point = []
+#
+#         self.setup_level()
+#
+# class Level_03(Level):
+#     """
+#     Class creating the first level
+#     """
+#     def __init__(self, player):
+#
+#         Level.__init__(self, player)
+#
+#         self.tmx_file = path.join(level_dir, "map3.tmx")
+#         self.tile_renderer = tilerenderer.Renderer(self.tmx_file)
+#         self.map_surface = self.tile_renderer.make_map()
+#         self.map_rect = self.map_surface.get_rect()
+#
+#         self.player = player
+#
+#         self.blockers = []
+#         self.end_point = []
+#
+#         self.setup_level()

@@ -5,7 +5,7 @@ import powerup
 
 vector = pygame.math.Vector2
 
-img_dir = path.join(path.dirname(__file__), "player_character")
+img_dir = path.join(path.dirname(__file__), "assets", "sprites", "player_character")
 
 
 class Player(pygame.sprite.Sprite):

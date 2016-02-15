@@ -5,7 +5,7 @@ from spritesheet_functions import SpriteSheet
 
 
 from os import path
-img_dir = path.join(path.dirname(__file__), "power_ups")
+img_dir = path.join(path.dirname(__file__), "assets", "sprites", "power_ups")
 
 
 class Mushroom(pygame.sprite.Sprite):

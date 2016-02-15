@@ -6,7 +6,7 @@ class Player(pg.sprite.Sprite):
     def __init__(self, start, paths, levels):
         super(Player, self).__init__()
 
-        self.image = pg.image.load("ov_player.png").convert_alpha()
+        self.image = pg.image.load("assets\sprites\player_character\ov_player.png").convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.x = start.x
         self.rect.y = start.y

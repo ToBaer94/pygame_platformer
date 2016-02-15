@@ -26,10 +26,10 @@ class GamePlay(GameState):
         # The level.tmx files are named the same way
         self.level_number = persistent["level"]
         self.persist = persistent
-        self.level_class = getattr(levels, self.level_number)
+        self.level_class = getattr(levels, "Level")
 
         # Create an instance of the actual level with reference to the player
-        self.level = self.level_class(self.player)
+        self.level = self.level_class(self.player, self.level_number)
 
         # Give the player a reference to the level as well.
         self.player.level = self.level

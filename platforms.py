@@ -13,7 +13,7 @@ STONE_PLATFORM_RIGHT  = (792, 648, 70, 40)
 POWER_UP              = (0  , 0  , 70, 70)
 POWER_DOWN            = (0  , 71 , 70, 70)
 
-img_dir = path.join(path.dirname(__file__), "world")
+img_dir = path.join(path.dirname(__file__), "assets", "map_tiles", "world")
 
 
 class Platform(pygame.sprite.Sprite):
