@@ -9,7 +9,7 @@ class GameState(object):
         self.next_state = None
         self.screen_rect = pg.display.get_surface().get_rect()
         self.persist = {} # Used to pass information between states
-        self.font = pg.font.Font(None, 96)
+        self.font = pg.font.Font(None, 60)
 
     def startup(self, persistent):
         self.persist = persistent

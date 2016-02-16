@@ -38,7 +38,6 @@ class Player(pygame.sprite.Sprite):
 
 
         self.pos = vector(0, 0)
-
         self.vel = vector(0, 0)
         self.acc = vector(0, 0)
 
@@ -144,7 +143,6 @@ class Player(pygame.sprite.Sprite):
         Experimental movement that uses floats to allow velocities like 0.5. Also uses experimental change
         to make movement FPS independent.
         """
-
         self.calc_grav(dt)
 
         self.vel.x += self.acc.x * dt
@@ -216,6 +214,7 @@ class Player(pygame.sprite.Sprite):
 
     def world_y_collision(self):
         self.jumping = True
+
         for block in self.level.blockers:
             if self.rect.colliderect(block):
                 if self.vel.y > 0:
@@ -226,7 +225,6 @@ class Player(pygame.sprite.Sprite):
                 elif self.vel.y < 0:
                     self.rect.top = block.bottom
                     self.pos.y = self.rect.y
-
                 self.vel.y = 0
 
         for block in self.level.platform_list:
@@ -290,7 +288,6 @@ class Player(pygame.sprite.Sprite):
 
         else:
             self.acc.y = 0.35
-
 
     def jump(self):
         """

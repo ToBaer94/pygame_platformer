@@ -3,6 +3,8 @@ import pygame as pg
 from states.splash_state import SplashScreen
 from states.map_state import Map
 from states.gameplay_state import GamePlay
+from states.level_start_state import LevelOpening
+from states.gameover_state import GameOver
 
 
 class Game(object):
@@ -17,7 +19,6 @@ class Game(object):
         self.desired_frame_time = self.ms_per_sec / self.target_fps
         self.max_step = 1.0
 
-
         self.states = states
         self.state_name = start_state
         self.state = self.states[self.state_name]
@@ -27,11 +28,14 @@ class Game(object):
             self.state.get_event(event)
 
     def flip_state(self):
+        print self.state.persist
         current_state = self.state_name
         next_state = self.state.next_state
+        print current_state, next_state
         self.state.done = False
         self.state_name = next_state
         persistent = self.state.persist
+
         self.state = self.states[next_state]
         self.state.screen = self.screen
         self.state.startup(persistent)
@@ -41,6 +45,7 @@ class Game(object):
             self.done = True
         elif self.state.done:
             self.flip_state()
+
         self.state.update(dt)
 
     def draw(self):
@@ -74,6 +79,8 @@ if __name__ == "__main__":
     states = {"SPLASH": SplashScreen(),
               "MAP": Map(),
               "LEVEL": GamePlay(),
+              "LEVELPREVIEW": LevelOpening(),
+              "GAMEOVER": GameOver()
                   }
     game = Game(screen, states, "SPLASH")
     game.run()

@@ -15,7 +15,7 @@ class Map(GameState):
         self.map_surface = self.tile_renderer.make_map()
         self.map_rect = self.map_surface.get_rect()
 
-        self.lives = 3
+        self.lives = 1
 
         self.start = None
         self.path_list = [] # Rects on all paths. Used to check for allowed moves.
@@ -24,7 +24,7 @@ class Map(GameState):
         self.text_pos_list = [] # List of rectangle positions for text
         self.text_list = [] # List of rendered font objects
 
-        self.next_state = "LEVEL"
+        self.next_state = "LEVELPREVIEW"
 
         # Create rects from objects on the map's object layer. Used for varying collision checks
         self.create_collision_objects()
@@ -84,16 +84,19 @@ class Map(GameState):
             text = font.render("Level" + " " + str(index + 1), True, pg.Color("black"))
             self.text_list.append(text)
 
-
     def startup(self, persistent):
         """ Startup when the state is set. Tries to update the life count of the player
         and updates the "persistent" dictionary used to pass on information between states"""
         try:
+
             self.lives = persistent["lives"]
+
+
         except:
             print "exception"
 
         self.persist = persistent
+
 
     def get_event(self, event):
         """ Handle events """
@@ -142,8 +145,12 @@ class Map(GameState):
     def update(self, dt):
         self.player.update()
         if self.lives <= 0:
-            print "You lost all your lives. Game Over"
-            self.quit = True
+            self.next_state = "GAMEOVER"
+            self.player.rect.x = self.start.x
+            self.player.rect.y = self.start.y
+            self.done = True
+        else:
+            self.next_state = "LEVELPREVIEW"
 
     def draw(self, screen):
         screen.fill(pg.Color("black"))
