@@ -2,6 +2,10 @@ import pygame as pg
 from base_state import GameState
 from player_level import Player
 import levels
+from os import path, pardir
+
+
+ui_dir = path.join(path.dirname(__file__), pardir, "assets", "sprites", "player_character", "ui")
 
 
 class GamePlay(GameState):
@@ -10,6 +14,12 @@ class GamePlay(GameState):
         super(GamePlay, self).__init__()
         self.screen = pg.display.get_surface()
         self.screen_rect = pg.display.get_surface().get_rect()
+        self.number_list = []
+        self.symbol = pg.image.load(path.join(ui_dir, "hud_p1.png")) # Holds the player life symbol sprite
+        self.x_symbol = pg.image.load(path.join(ui_dir, "hud_x.png")) # Holds the "X" sprite
+
+        for i in range(1, 10):
+            self.number_list.append(pg.image.load(path.join(ui_dir, "hud_" + str(i) + ".png")))
 
         self.next_state = "MAP"
 
@@ -40,20 +50,10 @@ class GamePlay(GameState):
     def get_event(self, event):
         if event.type == pg.QUIT:
             self.quit = True
-        elif event.type == pg.KEYDOWN:
-            if event.key == pg.K_SPACE:
-                    self.player.fire()
-            if event.key == pg.K_UP:
-                self.player.jump()
-        key_pressed = pg.key.get_pressed()
-        if key_pressed[pg.K_LEFT]:
-            self.player.go_left()
-        elif not key_pressed[pg.K_LEFT] and self.player.acc.x < 0:
-            self.player.stop()
-        if key_pressed[pg.K_RIGHT]:
-            self.player.go_right()
-        elif not key_pressed[pg.K_RIGHT] and self.player.acc.x > 0:
-            self.player.stop()
+        else:
+            self.player.handle_input(event)
+
+
 
     def update(self, dt):
         self.level.update(dt)
@@ -115,4 +115,8 @@ class GamePlay(GameState):
 
     def draw(self, screen):
         self.level.draw(self.screen)
+        screen.blit(self.symbol, (48, 32))
+        screen.blit(self.x_symbol, (100, 40))
+        if self.persist["lives"] > 0:
+            screen.blit(self.number_list[self.persist["lives"] - 1], (140, 37))
         self.active_sprite_list.draw(self.screen)

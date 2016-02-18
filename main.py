@@ -23,7 +23,11 @@ class Game(object):
         self.state_name = start_state
         self.state = self.states[self.state_name]
 
+        self.stuff = pg.USEREVENT + 1
+        self.custom_event = pg.event.Event(self.stuff)
+
     def event_loop(self):
+        pg.event.post(self.custom_event)
         for event in pg.event.get():
             self.state.get_event(event)
 
@@ -65,11 +69,6 @@ class Game(object):
 
             self.draw()
             pg.display.flip()
-
-
-
-
-
 
 
 if __name__ == "__main__":

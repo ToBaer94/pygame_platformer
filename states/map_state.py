@@ -1,7 +1,10 @@
 import pygame as pg
 from base_state import GameState
 import tilerenderer
+from os import path
+from os import pardir
 
+ui_dir = path.join(path.dirname(__file__), pardir, "assets", "sprites", "player_character", "ui")
 
 class Map(GameState):
     """ Map class handling the overworld screen. Sets the next state to gameplay_state
@@ -15,6 +18,13 @@ class Map(GameState):
         self.map_surface = self.tile_renderer.make_map()
         self.map_rect = self.map_surface.get_rect()
 
+        self.number_list = [] # Holds the number sprites
+        self.symbol = pg.image.load(path.join(ui_dir, "hud_p1.png")) # Holds the player life symbol sprite
+        self.x_symbol =  pg.image.load(path.join(ui_dir, "hud_x.png")) # Holds the "X" sprite
+
+
+
+
         self.lives = 1
 
         self.start = None
@@ -23,11 +33,15 @@ class Map(GameState):
         self.level_list = [] # Rects representing each level
         self.text_pos_list = [] # List of rectangle positions for text
         self.text_list = [] # List of rendered font objects
+        self.life_position = None
+        self.symbol_position = None
+        self.symbol_x_position = None
 
         self.next_state = "LEVELPREVIEW"
 
         # Create rects from objects on the map's object layer. Used for varying collision checks
         self.create_collision_objects()
+        self.create_ui()
 
         self.create_text() # Creates the text for each text field
 
@@ -62,13 +76,6 @@ class Map(GameState):
                     height = properties['height']
                     new_rect = pg.Rect(x, y, width, height)
                     self.level_collision_list.append(new_rect)
-                if properties["name"] == "text":
-                    x = properties['x']
-                    y = properties['y']
-                    width = properties['width']
-                    height = properties['height']
-                    new_rect = pg.Rect(x, y, width, height)
-                    self.text_pos_list.append(new_rect)
                 for i in range(1, 6):
                     if properties["name"] == ("level" + str(i)):
                         x = properties['x']
@@ -77,6 +84,43 @@ class Map(GameState):
                         height = properties['height']
                         new_rect = pg.Rect(x, y, width, height)
                         self.level_list.append(new_rect)
+
+    def create_ui(self):
+        for object_group in self.tile_renderer.tmx_data.objectgroups:
+            for tile_object in object_group:
+                properties = tile_object.__dict__
+                if properties["name"] == "text":
+                    x = properties['x']
+                    y = properties['y']
+                    width = properties['width']
+                    height = properties['height']
+                    new_rect = pg.Rect(x, y, width, height)
+                    self.text_pos_list.append(new_rect)
+                if properties["name"] == "lifecount":
+                    x = properties['x']
+                    y = properties['y']
+                    width = properties['width']
+                    height = properties['height']
+                    new_rect = pg.Rect(x, y, width, height)
+                    self.life_position = new_rect
+                if properties["name"] == "lifesymbol":
+                    x = properties['x']
+                    y = properties['y']
+                    width = properties['width']
+                    height = properties['height']
+                    new_rect = pg.Rect(x, y, width, height)
+                    self.symbol_position = new_rect
+                if properties["name"] == "lifex":
+                    x = properties['x']
+                    y = properties['y']
+                    width = properties['width']
+                    height = properties['height']
+                    new_rect = pg.Rect(x, y, width, height)
+                    self.symbol_x_position = new_rect
+
+        for i in range(1, 10):
+            self.number_list.append(pg.image.load(path.join(ui_dir, "hud_" + str(i) + ".png")))
+        print self.number_list
 
     def create_text(self):
         for index, location in enumerate(self.text_pos_list):
@@ -159,4 +203,8 @@ class Map(GameState):
         # Iterate through the list of textboxes and blit them on screen
         for item, index in zip(self.text_list, self.text_pos_list):
             screen.blit(item, (index))
+        if self.lives > 0:
+            screen.blit(self.symbol,(self.symbol_position))
+            screen.blit(self.x_symbol, (self.symbol_x_position))
+            screen.blit(self.number_list[self.lives-1], (self.life_position))
         self.sprite_list.draw(screen)

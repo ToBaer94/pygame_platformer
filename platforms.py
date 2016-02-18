@@ -128,15 +128,15 @@ class MovingPlatform(Platform):
     def collide(self):
         pass
 
-
     def player_collide(self, dt):
-
         if self.change_x != 0:
-            self.player.pos.y += 2
-            self.player.rect.y = self.player.pos.y
+            # self.player.pos.y += 2
+            # self.player.rect.y = self.player.pos.y
+            self.player.rect.y += 2
             hit = pygame.sprite.collide_rect(self, self.player)
-            self.player.pos.y -= 2
-            self.player.rect.y = self.player.pos.y
+            # self.player.pos.y -= 2
+            # self.player.rect.y = self.player.pos.y
+            self.player.rect.y -= 2
             if hit:
                 self.player.pos.x += self.change_x * dt
                 self.player.rect.x = self.player.pos.x

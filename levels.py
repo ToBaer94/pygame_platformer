@@ -5,6 +5,7 @@ import enemies
 import tilerenderer
 from player_level import Player
 from os import path
+import math
 
 img_dir = path.join(path.dirname(__file__), "world")
 level_dir = path.join(path.dirname(__file__), "assets", "levels")
@@ -31,10 +32,11 @@ class Level(object):
         self.player = player
         self.blockers = []
         self.end_point = []
+        self.ladders = []
+        self.ropes = []
 
         self.world_shift_x = 0
         self.world_shift_y = 0
-
 
         self.background = None
 
@@ -61,26 +63,40 @@ class Level(object):
         self.enemy_list.draw(screen)
         self.item_list.draw(screen)
         self.effect_list.draw(screen)
+
+        # Draw rects to debug rectangles
         """
-        # Draw rects to debug enemy collision
         for enemy in self.enemy_list:
             pygame.draw.rect(screen, constants.BLACK, [enemy.x_pos, enemy.y_pos, enemy.rect.width, enemy.rect.height], 1)
         """
+
+        for ladder in self.ladders:
+            pygame.draw.rect(screen, constants.BLACK, [ladder.x, ladder.y, ladder.width, ladder.height], 1)
+        pygame.draw.rect(screen, constants.BLACK, [self.player.rect.x, self.player.rect.y, self.player.rect.width, self.player.rect.height], 1)
 
     def shift_world_x(self, shift_x):
         """
         Offset all objects handled by the level class according to the viewport
         """
 
-
-
-        shift_x = round(shift_x)
+        if shift_x > 0:
+            shift_x = math.ceil(shift_x)
+        elif shift_x < 0:
+            shift_x = math.floor(shift_x)
+        print shift_x
         self.world_shift_x += shift_x
+
+        self.map_x += shift_x
+        self.end_point.x += shift_x
 
         for blocker in self.blockers:
             blocker.x += shift_x
-        self.map_x += shift_x
-        self.end_point.x += shift_x
+
+        for ladder in self.ladders:
+            ladder.x += shift_x
+
+        for rope in self.ropes:
+            rope.x += shift_x
 
         for movingplatform in self.platform_list:
             movingplatform.x_pos += shift_x
@@ -114,10 +130,18 @@ class Level(object):
         shift_y = round(shift_y)
         self.world_shift_y += shift_y
 
-        for blocker in self.blockers:
-            blocker.y += shift_y
         self.map_y += shift_y
         self.end_point.y += shift_y
+
+        for blocker in self.blockers:
+            blocker.y += shift_y
+
+        for ladder in self.ladders:
+            ladder.y += shift_y
+
+        for rope in self.ropes:
+            rope.y += shift_y
+
 
         for movingplatform in self.platform_list:
             movingplatform.y_pos += shift_y
@@ -198,11 +222,11 @@ class Level(object):
             if properties["name"] == "enemy":
                 x = properties['x']
                 y = properties['y']
-                self.create_enemy(x, y)
+                #self.create_enemy(x, y)
             if properties["name"] == "enemy2":
                 x = properties['x']
                 y = properties['y']
-                self.create_edgewalker(x, y)
+                #self.create_edgewalker(x, y)
             if properties["name"] == "movingplat":
                 x = properties['x']
                 y = properties['y']
@@ -246,6 +270,20 @@ class Level(object):
                 height = properties['height']
                 new_rect = pygame.Rect(x, y, width, height)
                 self.top_boundary = new_rect
+            if properties["name"] == "ladder":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.ladders.append(new_rect)
+            if properties["name"] == "rope":
+                x = properties['x']
+                y = properties['y']
+                width = properties['width']
+                height = properties['height']
+                new_rect = pygame.Rect(x, y, width, height)
+                self.ropes.append(new_rect)
 
 
 # class Level_01(Level):
