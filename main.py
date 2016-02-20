@@ -72,7 +72,10 @@ class Game(object):
 
 
 if __name__ == "__main__":
+    pg.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=512)
+    pg.mixer.init()
     pg.init()
+
     pg.display.set_caption("Platform Jumper 2")
     screen = pg.display.set_mode((800, 600))
     states = {"SPLASH": SplashScreen(),

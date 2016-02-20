@@ -23,6 +23,7 @@ class Level(object):
         self.enemy_list = pygame.sprite.Group()
         self.item_list = pygame.sprite.Group()
         self.effect_list = pygame.sprite.Group()
+        self.kill_animation_list = pygame.sprite.Group()
 
         self.tmx_file = path.join(level_dir, level + ".tmx")
         self.tile_renderer = tilerenderer.Renderer(self.tmx_file)
@@ -56,6 +57,7 @@ class Level(object):
         self.enemy_list.update(dt)
         self.item_list.update(dt)
         self.effect_list.update(dt)
+        self.kill_animation_list.update(dt)
 
     def draw(self, screen):
         screen.blit(self.map_surface, (self.map_x, self.map_y))
@@ -63,6 +65,7 @@ class Level(object):
         self.enemy_list.draw(screen)
         self.item_list.draw(screen)
         self.effect_list.draw(screen)
+        self.kill_animation_list.draw(screen)
 
         # Draw rects to debug rectangles
         """
@@ -83,7 +86,6 @@ class Level(object):
             shift_x = math.ceil(shift_x)
         elif shift_x < 0:
             shift_x = math.floor(shift_x)
-        print shift_x
         self.world_shift_x += shift_x
 
         self.map_x += shift_x
@@ -113,6 +115,10 @@ class Level(object):
         for effect in self.effect_list:
             effect.x_pos += shift_x
             effect.rect.x = effect.x_pos
+
+        for dead_enemy in self.kill_animation_list:
+            dead_enemy.x_pos += shift_x
+            dead_enemy.rect.x = dead_enemy.x_pos
 
         self.left_boundary.x += shift_x
         self.right_boundary.x += shift_x
@@ -158,6 +164,10 @@ class Level(object):
         for effect in self.effect_list:
             effect.y_pos += shift_y
             effect.rect.y = effect.y_pos
+
+        for dead_enemy in self.kill_animation_list:
+            dead_enemy.y_pos += shift_y
+            dead_enemy.rect.y = dead_enemy.y_pos
 
         self.left_boundary.y += shift_y
         self.right_boundary.y += shift_y
@@ -222,11 +232,11 @@ class Level(object):
             if properties["name"] == "enemy":
                 x = properties['x']
                 y = properties['y']
-                #self.create_enemy(x, y)
+                self.create_enemy(x, y)
             if properties["name"] == "enemy2":
                 x = properties['x']
                 y = properties['y']
-                #self.create_edgewalker(x, y)
+                self.create_edgewalker(x, y)
             if properties["name"] == "movingplat":
                 x = properties['x']
                 y = properties['y']

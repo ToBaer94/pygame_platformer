@@ -6,6 +6,7 @@ import powerup
 vector = pg.math.Vector2
 
 img_dir = path.join(path.dirname(__file__), "assets", "sprites", "player_character")
+sound_dir = path.join(path.dirname(__file__), "assets", "sound")
 
 
 class Player(pg.sprite.Sprite):
@@ -22,6 +23,9 @@ class Player(pg.sprite.Sprite):
         self.level = None
 
         self.state = "Normal"
+
+        self.max_speed = 5.0
+        self.jump_height = -11.0
 
         self.sprite_sheet = SpriteSheet(path.join(img_dir, "p1_spritesheet.png"))
         self.stand_sprite_r = self.sprite_sheet.get_image(67, 196, 66, 92)
@@ -40,11 +44,13 @@ class Player(pg.sprite.Sprite):
 
         self.rect = self.image.get_rect()
 
-
-
         self.pos = vector(0, 0)
         self.vel = vector(0, 0)
         self.acc = vector(0, 0)
+
+        self.jump_sound = pg.mixer.Sound(path.join(sound_dir, "jump.wav"))
+        self.fire_sound = pg.mixer.Sound(path.join(sound_dir, "fireball.wav"))
+        self.enemy_drop_sound = pg.mixer.Sound(path.join(sound_dir, "enemy_drop.wav"))
 
         self.dead = False
 
@@ -155,7 +161,14 @@ class Player(pg.sprite.Sprite):
         self.walking_frames_l.append(image)
 
     def handle_input(self, event):
+        self.max_speed = 5.0
+        self.jump_height = -11.0
         key_pressed = pg.key.get_pressed()
+        if key_pressed[pg.K_LSHIFT]:
+            self.max_speed = 7.0
+            if self.vel.x > 1.0 or self.vel.x < -1.0:
+                self.jump_height = -12.0
+
         if self.state == "Normal":
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_SPACE:
@@ -165,13 +178,13 @@ class Player(pg.sprite.Sprite):
                     for ladder in self.level.ladders:
                         if self.rect.colliderect(ladder):
                             self.set_climbing(ladder)
-                            break
+                            return
                     for rope in self.level.ropes:
                         if self.rect.colliderect(rope):
                             self.set_climbing(rope)
-                            break
+                            return
 
-                    else:
+                    if not self.state == "Climbing":
                         self.jump()
 
                 if event.key == pg.K_DOWN:
@@ -209,25 +222,35 @@ class Player(pg.sprite.Sprite):
         Experimental movement that uses floats to allow velocities like 0.5. Also uses experimental change
         to make movement FPS independent.
         """
-        if self.state == "Normal":
-            self.normal_update(dt)
+        print self.acc, self.vel, self.pos, self.rect.x, self.rect.y
+        if not self.dead:
+            if self.state == "Normal":
+                self.normal_update(dt)
 
-        elif self.state == "Climbing":
-            self.climbing_update(dt)
-        else:
-            print "whats hapnin"
+            elif self.state == "Climbing":
+                self.climbing_update(dt)
+
+        elif self.dead:
+            self.calc_grav(dt)
+            self.vel.y += self.acc.y * dt
+            self.pos.y += self.vel.y * dt
+            self.rect.y = self.pos.y
+
+            self.pos.x += self.vel.x * dt
+            self.rect.x = self.pos.x
 
     def normal_update(self, dt):
+
         self.calc_grav(dt)
 
         self.vel.x += self.acc.x * dt
-        if self.vel.x > 5:
-            self.vel.x = 5
-        if self.vel.x < -5:
-            self.vel.x = -5
-        if self.acc.x == 0 and 5 >= self.vel.x > 0:
+        if self.vel.x > self.max_speed:
+            self.vel.x = self.max_speed
+        if self.vel.x < -self.max_speed:
+            self.vel.x = -self.max_speed
+        if self.acc.x == 0 and self.max_speed >= self.vel.x > 0:
             self.vel.x -= 0.25 * dt
-        if self.acc.x == 0 and -5 <= self.vel.x < 0:
+        if self.acc.x == 0 and -self.max_speed <= self.vel.x < 0:
             self.vel.x += 0.25 * dt
         if -0.5 < self.vel.x < 0.5 and self.acc.x == 0:
             self.vel.x = 0
@@ -249,12 +272,18 @@ class Player(pg.sprite.Sprite):
             self.rect.x = 1
             self.pos.x = 1
             self.vel.x = 0
+        if self.pos.x >= 800 - self.rect.width:
+            self.rect.x = 799 - self.rect.width
+            self.pos.x = 799 - self.rect.width
+            self.vel.x = 0
 
         self.vel.y += self.acc.y * dt
         self.pos.y += self.vel.y * dt
         self.rect.y = self.pos.y
 
         self.enemy_collide()
+        if self.dead:
+            return
 
         if self.jumping:
             if self.direction == "Right":
@@ -275,7 +304,7 @@ class Player(pg.sprite.Sprite):
             item.collide()
 
         for ladder in self.level.ladders:
-            if self.rect.collidepoint((ladder.x + ladder.width // 2), (ladder.y - 50)):
+            if self.rect.collidepoint((ladder.x + ladder.width // 2), (ladder.y - 60)):
                 if self.vel.y < 0:
                     self.rect.bottom = ladder.top - 1
                     self.pos.y = self.rect.y
@@ -322,7 +351,6 @@ class Player(pg.sprite.Sprite):
     def world_x_collision(self):
         for block in self.level.blockers:
             if self.rect.colliderect(block):
-
                 if self.vel.x > 0:
                     self.rect.right = block.left
                     self.pos.x = self.rect.x
@@ -372,11 +400,13 @@ class Player(pg.sprite.Sprite):
                 block.collide()
 
         for ladder in self.level.ladders:
-            if self.rect.collidepoint(ladder.midtop):
-                self.rect.bottom = ladder.top
-                self.pos.y = self.rect.y
-                self.jumping = False
-                self.vel.y = 0
+            if self.rect.collidepoint(ladder.x, ladder.top) or self.rect.collidepoint\
+                    (ladder.x + ladder.width, ladder.top):
+                if self.rect.bottom > ladder.top and self.rect.bottom - 10 < ladder.top:
+                    self.rect.bottom = ladder.top
+                    self.pos.y = self.rect.y
+                    self.jumping = False
+                    self.vel.y = 0
 
     def enemy_collide(self):
         enemy_hit_list = pg.sprite.spritecollide(self, self.level.enemy_list, True)
@@ -385,6 +415,7 @@ class Player(pg.sprite.Sprite):
             if self.rect.collidepoint(enemy.rect.midtop) \
                     or self.rect.collidepoint(enemy.rect.x + 7, enemy.rect.y)\
                     or self.rect.collidepoint(enemy.rect.x + enemy.rect.width - 7, enemy.rect.y):
+                self.enemy_drop_sound.play()
                 print "hit on top"
             else:
                 # If the player has one, remove the power_up
@@ -394,6 +425,14 @@ class Player(pg.sprite.Sprite):
 
                 else:
                     self.dead = True
+                    self.death_init()
+
+    def death_init(self):
+        self.image = pg.transform.rotate(self.stand_sprite_r, 70)
+        self.acc.y = 0
+        self.acc.x = 0
+        self.vel.y = -10
+        self.vel.x = -1
 
     def set_climbing(self, ladder):
         self.state = "Climbing"
@@ -442,7 +481,8 @@ class Player(pg.sprite.Sprite):
         Handles gravity
         """
         if self.vel.y == 0:
-            self.vel.y = 1.0
+            if not self.dead:
+                self.vel.y = 1.0
 
         else:
             self.acc.y = 0.35
@@ -453,16 +493,25 @@ class Player(pg.sprite.Sprite):
         If on the ground, sets y-velocity.
         """
         if self.jumping == False:
-            self.vel.y = -11
+            self.vel.y = self.jump_height
             self.jumping = True
+            self.jump_sound.play()
 
     def go_left(self):
-        self.acc.x = -0.5
-        self.direction = "Left"
+        if pg.key.get_pressed()[pg.K_LSHIFT]:
+            self.acc.x = -0.55
+            self.direction = "Left"
+        else:
+            self.acc.x = -0.45
+            self.direction = "Left"
 
     def go_right(self):
-        self.acc.x = 0.5
-        self.direction = "Right"
+        if pg.key.get_pressed()[pg.K_LSHIFT]:
+            self.acc.x = 0.55
+            self.direction = "Right"
+        else:
+            self.acc.x = 0.45
+            self.direction = "Right"
 
     def stop(self):
         self.acc.x = 0
@@ -484,6 +533,7 @@ class Player(pg.sprite.Sprite):
             self.jumping_sprite_r = self.sprite_sheet.get_image(438, 93, 67, 94)
             self.jumping_sprite_l = pg.transform.flip(self.jumping_sprite_r, True, False)
             self.set_walking_animation()
+            self.set_climbing_animation()
             self.image = self.walking_frames_r[0]
 
     def hurt(self):
@@ -512,4 +562,5 @@ class Player(pg.sprite.Sprite):
         if self.status == "Fire":
             if len(self.level.effect_list) < 4:
                 fireball = powerup.Fireball(self, self.level, self.direction)
+                self.fire_sound.play()
                 self.level.effect_list.add(fireball)

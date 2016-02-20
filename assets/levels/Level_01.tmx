@@ -109,8 +109,8 @@
    <polygon points="0,0 420,0 420,41 0,41"/>
   </object>
   <object id="15" name="end" x="2870" y="420" width="70" height="140"/>
-  <object id="17" name="ladder" x="1680" y="280" width="70" height="206"/>
-  <object id="18" name="ladder" x="2030" y="210" width="70" height="275"/>
+  <object id="17" name="ladder" x="1697.5" y="280" width="35" height="206"/>
+  <object id="18" name="ladder" x="2047.5" y="210" width="35" height="275"/>
   <object id="28" name="blocker" x="1050" y="280" width="280" height="420"/>
   <object id="29" name="blocker" x="980" y="350" width="70" height="350"/>
   <object id="30" name="blocker" x="910" y="420" width="70" height="280"/>
@@ -127,8 +127,8 @@
   <object id="66" name="lowb" x="0" y="682.5" width="3080" height="17.5"/>
   <object id="68" name="leftb" x="0" y="0" width="17.5" height="700"/>
   <object id="73" name="rightb" x="3062.5" y="0" width="17.5" height="700"/>
-  <object id="74" name="upb" x="0" y="0" width="3080" height="17.5"/>
-  <object id="75" name="ladder" x="350" y="280" width="70" height="206"/>
-  <object id="76" name="rope" x="490" y="280" width="70" height="210"/>
+  <object id="74" name="upb" x="0" y="35" width="3080" height="17.5"/>
+  <object id="75" name="ladder" x="367.5" y="280" width="35" height="206"/>
+  <object id="76" name="rope" x="507.5" y="280" width="35" height="210"/>
  </objectgroup>
 </map>

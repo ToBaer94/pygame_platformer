@@ -96,9 +96,9 @@
   <object id="61" name="enemy2" x="2030" y="630" width="70" height="70"/>
   <object id="62" name="enemy2" x="735" y="542.5" width="70" height="70"/>
   <object id="63" name="enemy2" x="210" y="210" width="70" height="70"/>
-  <object id="64" name="rope" x="1820" y="234" width="67" height="522"/>
-  <object id="65" name="Start" x="140" y="630" width="70" height="122.5"/>
-  <object id="66" name="end" x="2800" y="455" width="70" height="140"/>
+  <object id="64" name="rope" x="1837.5" y="234" width="35" height="522"/>
+  <object id="65" name="Start" x="140" y="647.5" width="70" height="105"/>
+  <object id="66" name="end" x="2800" y="472.5" width="70" height="140"/>
   <object id="67" name="blocker" x="770" y="210" width="280" height="35"/>
   <object id="68" name="blocker" x="630" y="630" width="350" height="35"/>
   <object id="69" name="blocker" x="70" y="350" width="560" height="35"/>

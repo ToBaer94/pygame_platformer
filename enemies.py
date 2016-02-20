@@ -22,6 +22,8 @@ class Enemy(pygame.sprite.Sprite):
         self.change_x = -1
         self.change_y = 0
 
+        self.dead = False
+
         self.direction = "Left"
 
         self.level = level
@@ -32,42 +34,59 @@ class Enemy(pygame.sprite.Sprite):
         Uses flip() method to flip the sprite when hitting a wall
         on the x-axis
         """
-        self.calc_grav(dt)
+        if not self.dead:
+            self.calc_grav(dt)
 
-        self.y_pos += float(self.change_y) * dt
-        self.rect.y = self.y_pos
+            self.y_pos += float(self.change_y) * dt
+            self.rect.y = self.y_pos
 
-        for block in self.level.blockers:
-            if self.rect.colliderect(block):
-                if self.change_y > 0:
-                    self.rect.bottom = block.top
-                    self.y_pos = self.rect.y
-                elif self.change_y < 0:
-                    self.rect.top = block.bottom
-                    self.y_pos = self.rect.y
-                self.change_y = 0
-            #block.collide()
-            #if isinstance(block, platforms.MovingPlatform):
-            #    self.rect.x += block.change_x
+            for block in self.level.blockers:
+                if self.rect.colliderect(block):
+                    if self.change_y > 0:
+                        self.rect.bottom = block.top
+                        self.y_pos = self.rect.y
+                    elif self.change_y < 0:
+                        self.rect.top = block.bottom
+                        self.y_pos = self.rect.y
+                    self.change_y = 0
+                #block.collide()
+                #if isinstance(block, platforms.MovingPlatform):
+                #    self.rect.x += block.change_x
 
-        self.x_pos += float(self.change_x) * dt
-        self.rect.x = self.x_pos
+            self.x_pos += float(self.change_x) * dt
+            self.rect.x = self.x_pos
 
-        for block in self.level.blockers:
-            if self.rect.colliderect(block):
-                if self.change_x < 0:
-                    self.rect.left = block.right
-                    self.x_pos = self.rect.x
-                    self.change_x *= -1
-                    self.flip()
-                elif self.change_x > 0:
-                    self.rect.right = block.left
-                    self.x_pos = self.rect.x
-                    self.change_x *= -1
-                    self.flip()
+            for block in self.level.blockers:
+                if self.rect.colliderect(block):
+                    if self.change_x < 0:
+                        self.rect.left = block.right
+                        self.x_pos = self.rect.x
+                        self.change_x *= -1
+                        self.flip()
+                    elif self.change_x > 0:
+                        self.rect.right = block.left
+                        self.x_pos = self.rect.x
+                        self.change_x *= -1
+                        self.flip()
+        elif self.dead:
+            self.calc_grav(dt)
+
+            self.y_pos += float(self.change_y) * dt
+            self.rect.y = self.y_pos
+
+            self.x_pos += float(self.change_x) * dt
+            self.rect.x = self.x_pos
 
         if self.rect.y > 600:
             self.kill()
+
+    def kill_init(self):
+        self.dead = True
+        self.level.kill_animation_list.add(self)
+        self.level.enemy_list.remove(self)
+        self.change_y = -5 # Make the enemy fly a small distance into the air
+        self.image = pygame.transform.flip(self.image, False, True) # Flip the enemy upside down
+
 
     def flip(self):
         """
@@ -114,6 +133,7 @@ class EdgeWalker(Enemy):
         self.y_pos = y
 
         self.onground = False
+        self.dead = False
 
         self.frame = 0 # Used for animation speed
         self.anim_speed = 100 # Used for animation speed
@@ -150,50 +170,63 @@ class EdgeWalker(Enemy):
 
     def update(self, dt):
         """ Handles movement and platform collision """
-        self.calc_grav(dt)
-        self.animate()
+        if not self.dead:
+            self.calc_grav(dt)
+            self.animate()
 
-        # Create a point to the bottom left or bottom right of the enemy
-        m = (1, 1) if self.change_x > 0 else (-1, 1)
-        point = self.rect.bottomright if self.change_x > 0 else self.rect.bottomleft
-        fp = map(sum, zip(m, point))
+            # Create a point to the bottom left or bottom right of the enemy
+            m = (1, 1) if self.change_x > 0 else (-1, 1)
+            point = self.rect.bottomright if self.change_x > 0 else self.rect.bottomleft
+            fp = map(sum, zip(m, point))
 
-        # Check if the created point does collide with a platform
-        collide = any(p for p in self.level.blockers if p.collidepoint(fp))
+            # Check if the created point does collide with a platform
+            collide = any(p for p in self.level.blockers if p.collidepoint(fp))
 
-        # If there is no collision, turn the enemy around (if the enemy is not in the air)
-        if not collide:
-            if self.onground:
-                self.change_x *= -1
-                self.flip()
-
-        self.y_pos += float(self.change_y) * dt
-        self.rect.y = self.y_pos
-
-        for block in self.level.blockers:
-            if self.rect.colliderect(block):
-                self.onground = True
-                if self.change_y > 0:
-                    self.rect.bottom = block.top
-                    self.y_pos = self.rect.y
-                elif self.change_y < 0:
-                    self.rect.top = block.bottom
-                    self.y_pos = self.rect.y
-
-                self.change_y = 0
-
-        self.x_pos += float(self.change_x) * dt
-        self.rect.x = self.x_pos
-
-        for block in self.level.blockers:
-            if self.rect.colliderect(block):
-                if self.change_x < 0:
-                    self.rect.left = block.right
-                    self.x_pos = self.rect.x
+            # If there is no collision, turn the enemy around (if the enemy is not in the air)
+            if not collide:
+                if self.onground:
                     self.change_x *= -1
                     self.flip()
-                elif self.change_x > 0:
-                    self.rect.right = block.left
-                    self.x_pos = self.rect.x
-                    self.change_x *= -1
-                    self.flip()
+
+            self.y_pos += float(self.change_y) * dt
+            self.rect.y = self.y_pos
+
+            for block in self.level.blockers:
+                if self.rect.colliderect(block):
+                    self.onground = True
+                    if self.change_y > 0:
+                        self.rect.bottom = block.top
+                        self.y_pos = self.rect.y
+                    elif self.change_y < 0:
+                        self.rect.top = block.bottom
+                        self.y_pos = self.rect.y
+
+                    self.change_y = 0
+
+            self.x_pos += float(self.change_x) * dt
+            self.rect.x = self.x_pos
+
+            for block in self.level.blockers:
+                if self.rect.colliderect(block):
+                    if self.change_x < 0:
+                        self.rect.left = block.right
+                        self.x_pos = self.rect.x
+                        self.change_x *= -1
+                        self.flip()
+                    elif self.change_x > 0:
+                        self.rect.right = block.left
+                        self.x_pos = self.rect.x
+                        self.change_x *= -1
+                        self.flip()
+
+        elif self.dead:
+            self.calc_grav(dt)
+
+            self.y_pos += float(self.change_y) * dt
+            self.rect.y = self.y_pos
+
+            self.x_pos += float(self.change_x) * dt
+            self.rect.x = self.x_pos
+
+        if self.rect.y > 600:
+            self.kill()

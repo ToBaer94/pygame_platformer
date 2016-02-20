@@ -6,7 +6,7 @@ from spritesheet_functions import SpriteSheet
 
 from os import path
 img_dir = path.join(path.dirname(__file__), "assets", "sprites", "power_ups")
-
+sound_dir = path.join(path.dirname(__file__), "assets", "sound")
 
 class Mushroom(pygame.sprite.Sprite):
     """ Class for the mushroom pickup item, moves like an enemy with slightly less gravity """
@@ -119,6 +119,8 @@ class Fireball(pygame.sprite.Sprite):
         self.change_x = 0
         self.change_y = 0
 
+        self.hit_sound = pygame.mixer.Sound(path.join(sound_dir, "hit.wav"))
+
         if self.direction == "Right":
             self.rect.x = self.player.rect.x + self.player.rect.width
             self.rect.y = self.player.rect.y
@@ -169,9 +171,12 @@ class Fireball(pygame.sprite.Sprite):
 
         self.world_x_collide()
 
-        enemy_hit_list = pygame.sprite.spritecollide(self, self.level.enemy_list, True)
+        enemy_hit_list = pygame.sprite.spritecollide(self, self.level.enemy_list, False)
         if enemy_hit_list:
             self.kill()
+            for enemy in enemy_hit_list:
+                self.hit_sound.play()
+                enemy.kill_init()
 
         now = pygame.time.get_ticks()
         if now - self.last_fire_update > 2500:

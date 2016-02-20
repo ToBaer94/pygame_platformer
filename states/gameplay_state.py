@@ -53,15 +53,13 @@ class GamePlay(GameState):
         else:
             self.player.handle_input(event)
 
-
-
     def update(self, dt):
         self.level.update(dt)
         self.active_sprite_list.update(dt)
         self.move_camera_x(dt)
         self.move_camera_y(dt)
 
-        if self.player.rect.top > self.screen_rect.height or self.player.dead:
+        if self.player.rect.top > self.screen_rect.height:
             print "You're dead"
             self.persist["lives"] -= 1
             self.done = True
