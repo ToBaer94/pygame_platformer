@@ -26,3 +26,20 @@ Credit for the overworld art goes to Buch: http://opengameart.org/content/the-fi
 
 Credit for the Land Monster and the Worm-type Enemy goes to bevouliin: http://opengameart.org/content/bevouliin-free-sprite-sheets-underground-worm-monster
 http://opengameart.org/content/bevouliin-free-sprite-sheets-monster-game-asset
+
+Credit for the planet goes to Bonsaiheldin | http://bonsaiheld.org | http://opengameart.org/content/colorful-planets-0
+Credit for the asteroid and the stars goes to immersivegamer http://opengameart.org/content/space-shooter-assets
+
+
+Music track level 1 : “Pixel adventures”. Music by Marcelo Fernandez (http://www.marcelofernandezmusic.com).
+Licensed under Creative Commons Attribution 4.0 International (http://creativecommons.org/licenses/by/4.0/).
+
+Music track level 2: Snabisch - http://opengameart.org/content/snabisch-tunes-8-bit-version
+
+Music track level 2: Snabisch - http://opengameart.org/content/the-traveller-nes-version
+
+Level complete fanfare by Johan Brodd 2014: http://opengameart.org/content/level-finish-fanfares
+
+Game Over theme Composed by: Cleyton R. Xavier - http://opengameart.org/users/doppelganger
+
+Overworld theme by RevampedPRO: http://opengameart.org/content/8bit-adventure

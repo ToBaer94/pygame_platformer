@@ -51,6 +51,9 @@ class Player(pg.sprite.Sprite):
         self.jump_sound = pg.mixer.Sound(path.join(sound_dir, "jump.wav"))
         self.fire_sound = pg.mixer.Sound(path.join(sound_dir, "fireball.wav"))
         self.enemy_drop_sound = pg.mixer.Sound(path.join(sound_dir, "enemy_drop.wav"))
+        self.hit_sound = pg.mixer.Sound(path.join(sound_dir, "player_hit.wav"))
+        self.power_up_sound = pg.mixer.Sound(path.join(sound_dir, "power_up.wav"))
+        self.power_up_sound.set_volume(0.2)
 
         self.dead = False
 
@@ -61,7 +64,7 @@ class Player(pg.sprite.Sprite):
             if properties["name"] == "Start":
                 self.pos.x = properties['x']
                 self.pos.y = properties['y']
-                print self.pos.x, self.pos.y
+                # print self.pos.x, self.pos.y
 
         self.rect.x = self.pos.x
         self.rect.y = self.pos.y
@@ -77,7 +80,7 @@ class Player(pg.sprite.Sprite):
         self.climbing_frames.append(image)
         image = pg.image.load(path.join(img_dir, "alien" + status + "_climb2.png")).convert_alpha()
         self.climbing_frames.append(image)
-        print self.climbing_frames
+        # print self.climbing_frames
 
     def set_walking_animation(self):
         """
@@ -167,7 +170,7 @@ class Player(pg.sprite.Sprite):
         if key_pressed[pg.K_LSHIFT]:
             self.max_speed = 7.0
             if self.vel.x > 1.0 or self.vel.x < -1.0:
-                self.jump_height = -12.0
+                self.jump_height = -13.0
 
         if self.state == "Normal":
             if event.type == pg.KEYDOWN:
@@ -222,7 +225,6 @@ class Player(pg.sprite.Sprite):
         Experimental movement that uses floats to allow velocities like 0.5. Also uses experimental change
         to make movement FPS independent.
         """
-        print self.acc, self.vel, self.pos, self.rect.x, self.rect.y
         if not self.dead:
             if self.state == "Normal":
                 self.normal_update(dt)
@@ -371,8 +373,6 @@ class Player(pg.sprite.Sprite):
                     self.vel.x = 0
 
     def world_y_collision(self):
-        self.jumping = True
-
         for block in self.level.blockers:
             if self.rect.colliderect(block):
                 if self.vel.y > 0:
@@ -416,15 +416,16 @@ class Player(pg.sprite.Sprite):
                     or self.rect.collidepoint(enemy.rect.x + 7, enemy.rect.y)\
                     or self.rect.collidepoint(enemy.rect.x + enemy.rect.width - 7, enemy.rect.y):
                 self.enemy_drop_sound.play()
-                print "hit on top"
+                # print "hit on top"
             else:
                 # If the player has one, remove the power_up
                 if self.status == "Fire":
                     self.hurt()
-                    print self.status
+                    # print self.status
 
                 else:
                     self.dead = True
+                    self.hit_sound.play()
                     self.death_init()
 
     def death_init(self):
@@ -493,6 +494,8 @@ class Player(pg.sprite.Sprite):
         If on the ground, sets y-velocity.
         """
         if self.jumping == False:
+            self.pos.y -= 2
+            self.rect.y = self.pos.y
             self.vel.y = self.jump_height
             self.jumping = True
             self.jump_sound.play()
@@ -523,6 +526,7 @@ class Player(pg.sprite.Sprite):
         """
 
         if self.status != "Fire":
+            self.power_up_sound.play()
             self.status = "Fire"
 
             self.sprite_sheet = SpriteSheet(path.join(img_dir,"p3_spritesheet.png"))
@@ -541,6 +545,8 @@ class Player(pg.sprite.Sprite):
         if self.status == "Fire":
             self.status = "Small"
             self.state = "Normal"
+
+            self.hit_sound.play()
 
             self.sprite_sheet = SpriteSheet(path.join(img_dir,"p1_spritesheet.png"))
             self.stand_sprite_r = self.sprite_sheet.get_image(67, 196, 66, 92)

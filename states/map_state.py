@@ -5,6 +5,7 @@ from os import path
 from os import pardir
 
 ui_dir = path.join(path.dirname(__file__), pardir, "assets", "sprites", "player_character", "ui")
+music_dir = path.join(path.dirname(__file__), pardir, "assets", "music")
 
 class Map(GameState):
     """ Map class handling the overworld screen. Sets the next state to gameplay_state
@@ -120,7 +121,7 @@ class Map(GameState):
 
         for i in range(1, 10):
             self.number_list.append(pg.image.load(path.join(ui_dir, "hud_" + str(i) + ".png")))
-        print self.number_list
+        # print self.number_list
 
     def create_text(self):
         for index, location in enumerate(self.text_pos_list):
@@ -135,11 +136,13 @@ class Map(GameState):
 
             self.lives = persistent["lives"]
 
-
         except:
-            print "exception"
+            pass
+            # print "exception"
 
         self.persist = persistent
+        pg.mixer.music.load(path.join(music_dir, "map.mp3"))
+        pg.mixer.music.play()
 
 
     def get_event(self, event):
@@ -168,7 +171,7 @@ class Map(GameState):
                     if self.player.rect.colliderect(level):
                         # If the player is on the rect of level 1 (index 0 in self.leve_list)
                         if index == 0:
-                            print "should be first level"
+                            # print "should be first level"
                             level_name = "Level_0" + str(index+1)
                             self.persist["level"] = level_name
                             self.persist["lives"] = self.lives

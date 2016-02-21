@@ -18,6 +18,8 @@ class LevelOpening(GameState):
         self.persist = persistent
         self.drawn = False
 
+        pg.mixer.music.stop()
+
         self.level_name = self.persist["level"]
         self.lives = self.persist["lives"]
 
@@ -39,11 +41,12 @@ class LevelOpening(GameState):
         # elif event.type == pg.KEYUP:
         #     if event.key == pg.K_SPACE:
         #         self.done = True
+
     def update(self, dt):
         if self.drawn:
 
             pg.time.wait(1200)
-            print "1000 is over"
+            # print "1200 is over"
             self.done = True
 
     def draw(self, screen):

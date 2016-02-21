@@ -6,6 +6,7 @@ from os import path, pardir
 
 
 ui_dir = path.join(path.dirname(__file__), pardir, "assets", "sprites", "player_character", "ui")
+music_dir = path.join(path.dirname(__file__), pardir, "assets", "music")
 
 
 class GamePlay(GameState):
@@ -22,11 +23,13 @@ class GamePlay(GameState):
             self.number_list.append(pg.image.load(path.join(ui_dir, "hud_" + str(i) + ".png")))
 
         self.next_state = "MAP"
+        self.complete = False
 
     def startup(self, persistent):
         """ Set up everything for the passed in level. startup runs when switch state"""
         self.player = Player()
         self.level = None
+        self.complete = False
 
         # Player lives
         self.persist["lives"] = persistent["lives"]
@@ -40,6 +43,9 @@ class GamePlay(GameState):
 
         # Create an instance of the actual level with reference to the player
         self.level = self.level_class(self.player, self.level_number)
+        print str(self.level_number)
+
+
 
         # Give the player a reference to the level as well.
         self.player.level = self.level
@@ -53,6 +59,7 @@ class GamePlay(GameState):
         else:
             self.player.handle_input(event)
 
+
     def update(self, dt):
         self.level.update(dt)
         self.active_sprite_list.update(dt)
@@ -60,33 +67,43 @@ class GamePlay(GameState):
         self.move_camera_y(dt)
 
         if self.player.rect.top > self.screen_rect.height:
+            pg.mixer.music.stop()
             print "You're dead"
             self.persist["lives"] -= 1
             self.done = True
 
-        if self.player.rect.colliderect(self.level.end_point):
+        if self.player.rect.colliderect(self.level.end_point) and not self.complete:
+            self.complete = True
+            # pg.mixer.music.stop()
             self.persist[self.level_number] = True
-            print self.persist
-            self.done = True
+            pg.mixer.music.load(path.join(music_dir, str(self.level_number) + "_finish.ogg"))
+            pg.mixer.music.play()
+            pg.mixer.music.set_endevent()
+            self.now = pg.time.get_ticks()
+
+        if self.complete == True:
+            new_now = pg.time.get_ticks()
+            if new_now - self.now > 8000:
+                self.done = True
 
     def move_camera_x(self, dt):
         """ If the player is far to the left or to the right of the viewport, move the map accordingly
         If the viewport collides with the edge of the map, stop moving """
-        if self.player.pos.x >= 500.0:
+        if self.player.pos.x >= 400.0:
             if self.screen_rect.colliderect(self.level.right_boundary):
                 pass
             else:
-                diff = self.player.pos.x - 500.0
-                self.player.pos.x = 500
+                diff = self.player.pos.x - 400.0
+                self.player.pos.x = 400
                 self.player.rect.x = self.player.pos.x
                 self.level.shift_world_x(-diff)
 
-        if self.player.pos.x <= 120:
+        if self.player.pos.x <= 300:
             if self.screen_rect.colliderect(self.level.left_boundary):
                 pass
             else:
-                diff = 120 - self.player.pos.x
-                self.player.pos.x = 120
+                diff = 300 - self.player.pos.x
+                self.player.pos.x = 300
                 self.player.rect.x = self.player.pos.x
                 self.level.shift_world_x(diff)
 
@@ -102,11 +119,11 @@ class GamePlay(GameState):
                 self.player.rect.y = self.player.pos.y
                 self.level.shift_world_y(-diff)
 
-        if self.player.pos.y <= 120:
+        if self.player.pos.y <= 150:
             if self.screen_rect.colliderect(self.level.top_boundary):
                 pass
             else:
-                diff = 120 - self.player.pos.y
+                diff = 150 - self.player.pos.y
                 self.player.pos.y += diff
                 self.player.rect.y = self.player.pos.y
                 self.level.shift_world_y(diff)

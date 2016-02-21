@@ -77,7 +77,7 @@ class Enemy(pygame.sprite.Sprite):
             self.x_pos += float(self.change_x) * dt
             self.rect.x = self.x_pos
 
-        if self.rect.y > 600:
+        if self.rect.y > 5000:
             self.kill()
 
     def kill_init(self):
@@ -228,5 +228,5 @@ class EdgeWalker(Enemy):
             self.x_pos += float(self.change_x) * dt
             self.rect.x = self.x_pos
 
-        if self.rect.y > 600:
+        if self.rect.y > 5000:
             self.kill()

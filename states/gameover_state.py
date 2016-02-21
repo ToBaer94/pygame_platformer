@@ -1,6 +1,9 @@
 from base_state import GameState
 import pygame as pg
+from os import path, pardir
 
+
+music_dir = path.join(path.dirname(__file__), pardir, "assets", "music")
 
 class GameOver(GameState):
     """ State class representing the opening screen. Sets the next state to map_state when pressing space """
@@ -18,7 +21,6 @@ class GameOver(GameState):
                                                           self.screen_rect.height * 3 // 4))
         self.next_state = "MAP"
 
-
     def get_event(self, event):
         if event.type == pg.QUIT:
             self.quit = True
@@ -27,6 +29,10 @@ class GameOver(GameState):
                 self.persist = {}
                 self.persist["lives"] = 3
                 self.done = True
+
+    def startup(self, persistent):
+        pg.mixer.music.load(path.join(music_dir, "game_over.mp3"))
+        pg.mixer.music.play()
 
     def draw(self, screen):
         screen.fill(pg.Color("black"))

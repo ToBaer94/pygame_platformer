@@ -9,6 +9,7 @@ import math
 
 img_dir = path.join(path.dirname(__file__), "world")
 level_dir = path.join(path.dirname(__file__), "assets", "levels")
+music_dir = path.join(path.dirname(__file__), "assets", "music")
 
 
 class Level(object):
@@ -29,6 +30,13 @@ class Level(object):
         self.tile_renderer = tilerenderer.Renderer(self.tmx_file)
         self.map_surface = self.tile_renderer.make_map()
         self.map_rect = self.map_surface.get_rect()
+        try:
+            pygame.mixer.music.load(path.join(music_dir, level + ".mp3"))
+        except:
+            pass
+
+        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.play(-1)
 
         self.player = player
         self.blockers = []
@@ -71,12 +79,12 @@ class Level(object):
         """
         for enemy in self.enemy_list:
             pygame.draw.rect(screen, constants.BLACK, [enemy.x_pos, enemy.y_pos, enemy.rect.width, enemy.rect.height], 1)
-        """
+
 
         for ladder in self.ladders:
             pygame.draw.rect(screen, constants.BLACK, [ladder.x, ladder.y, ladder.width, ladder.height], 1)
         pygame.draw.rect(screen, constants.BLACK, [self.player.rect.x, self.player.rect.y, self.player.rect.width, self.player.rect.height], 1)
-
+        """
     def shift_world_x(self, shift_x):
         """
         Offset all objects handled by the level class according to the viewport
@@ -150,8 +158,11 @@ class Level(object):
 
 
         for movingplatform in self.platform_list:
+            movingplatform.boundary_bottom += shift_y
+            movingplatform.boundary_top += shift_y
             movingplatform.y_pos += shift_y
             movingplatform.rect.y = movingplatform.y_pos
+
 
         for enemy in self.enemy_list:
             enemy.y_pos += shift_y
@@ -237,10 +248,14 @@ class Level(object):
                 x = properties['x']
                 y = properties['y']
                 self.create_edgewalker(x, y)
-            if properties["name"] == "movingplat":
+            if properties["name"] == "movingplatlr":
                 x = properties['x']
                 y = properties['y']
                 self.create_moving_platform([x, y, x-50, x+50, 0, 0, 1, 0], self.player)
+            if properties["name"] == "movingplatud":
+                x = properties['x']
+                y = properties['y']
+                self.create_moving_platform([x, y, 0, 0, y-300, y+300, 0, 1], self.player)
             if properties["name"] == "itemblock":
                 x = properties['x']
                 y = properties['y']
