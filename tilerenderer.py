@@ -2,6 +2,7 @@ import pygame
 import pytmx.pytmx
 import pytmx.util_pygame
 
+
 class Renderer(object):
     def __init__(self, filename):
         tm = pytmx.util_pygame.load_pygame(filename, pixelalpha=True)

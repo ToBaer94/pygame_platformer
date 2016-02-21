@@ -13,7 +13,7 @@ STONE_PLATFORM_RIGHT  = (792, 648, 70, 40)
 POWER_UP              = (0  , 0  , 70, 70)
 POWER_DOWN            = (0  , 71 , 70, 70)
 
-img_dir = path.join(path.dirname(__file__), "world")
+img_dir = path.join(path.dirname(__file__), "assets", "map_tiles", "world")
 
 
 class Platform(pygame.sprite.Sprite):
@@ -85,14 +85,15 @@ class MovingPlatform(Platform):
 
         hit = pygame.sprite.collide_rect(self, self.player)
         if hit:
-            if self.change_x < 0:
-                self.player.rect.right = self.rect.left
-                self.player.pos.x = self.player.rect.x
-                self.player.vel.x = 0
-            else:
-                self.player.rect.left = self.rect.right
-                self.player.pos.x = self.player.rect.x
-                self.player.vel.x = 0
+            if self.change_y == 0:
+                if self.change_x < 0:
+                    self.player.rect.right = self.rect.left
+                    self.player.pos.x = self.player.rect.x
+                    self.player.vel.x = 0
+                else:
+                    self.player.rect.left = self.rect.right
+                    self.player.pos.x = self.player.rect.x
+                    self.player.vel.x = 0
 
         self.player_collide(dt)
 
@@ -102,13 +103,15 @@ class MovingPlatform(Platform):
         hit = pygame.sprite.collide_rect(self, self.player)
         if hit:
             if self.change_y < 0:
-                self.player.rect.bottom = self.rect.top
+                self.player.rect.bottom = self.rect.top - 1
                 self.player.pos.y = self.player.rect.y
                 self.player.vel.y = 0
+                """
             else:
                 self.player.rect.top = self.rect.bottom
                 self.player.pos.y = self.player.rect.y
                 self.player.vel.y = 0
+                """
 
         if self.change_y != 0:
             cur_y_pos = round(self.y_pos)
@@ -128,15 +131,15 @@ class MovingPlatform(Platform):
     def collide(self):
         pass
 
-
     def player_collide(self, dt):
-
         if self.change_x != 0:
-            self.player.pos.y += 2
-            self.player.rect.y = self.player.pos.y
+            # self.player.pos.y += 2
+            # self.player.rect.y = self.player.pos.y
+            self.player.rect.y += 2
             hit = pygame.sprite.collide_rect(self, self.player)
-            self.player.pos.y -= 2
-            self.player.rect.y = self.player.pos.y
+            # self.player.pos.y -= 2
+            # self.player.rect.y = self.player.pos.y
+            self.player.rect.y -= 2
             if hit:
                 self.player.pos.x += self.change_x * dt
                 self.player.rect.x = self.player.pos.x
@@ -153,6 +156,11 @@ class SpecialBlock(Platform):
         self.x_pos = x
         self.y_pos = y
 
+        self.boundary_top = 0
+        self.boundary_bottom = 0
+        self.boundary_left = 0
+        self.boundary_right = 0
+
         self.opened = False
 
         self.player = None
@@ -164,7 +172,7 @@ class SpecialBlock(Platform):
         and changes its sprite to empty
         """
         if self.rect.bottom == self.player.rect.top and not self.opened:
-            print "Works"
+            # print "Works"
             self.opened = True
             self.spawn_item(self.rect.x, self.rect.y)
             self.set_image(POWER_DOWN)

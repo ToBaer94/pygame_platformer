@@ -7,4 +7,4 @@ BLUE = (0, 0, 150)
 
 # Screen dimensions
 SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 630
+SCREEN_HEIGHT = 600
